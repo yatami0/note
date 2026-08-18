@@ -131,6 +131,10 @@ def transform(note, title_by_slug, backlinks, tag_notes):
     src = re.sub(r"^(https?://(?:x\.com|twitter\.com)/\S+/status/\d+\S*)\s*$",
                  tweet_repl, src, flags=re.M)
 
+    # URL中の #fragment をタグと誤認しない(かつリンクを壊さない)よう、URL全体を保護する。
+    # 「#の直前が英数字なら無視」のルールでは ".../page/#section" 形をすり抜けてしまう。
+    src = re.sub(r"https?://[^\s)\]>]+", protect_pre, src)
+
     # [[slug]] / [[slug|表示テキスト]] → 通常のMarkdownリンク。リンク元を記録。
     def wikilink_repl(m):
         target, label = m.group(1), m.group(2)
