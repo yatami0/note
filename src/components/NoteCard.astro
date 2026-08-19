@@ -1,0 +1,20 @@
+---
+import type { Note } from '../lib/notes';
+
+interface Props {
+  note: Note;
+}
+
+const { note } = Astro.props;
+---
+
+<li class="note-card">
+  <h2><a href={`/${note.slug}/`}>{note.title}</a></h2>
+  {note.excerpt && <p class="excerpt">{note.excerpt}</p>}
+  <div class="note-card-meta">
+    <span class="note-date">{note.updated.slice(0, 10)}</span>
+    {note.tags.map((tag) => (
+      <a class="note-tag" href={`/tags/${encodeURIComponent(tag)}/`}>#{tag}</a>
+    ))}
+  </div>
+</li>

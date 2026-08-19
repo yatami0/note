@@ -1,0 +1,24 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getNotes } from '../../lib/notes';
+
+const { tags } = await getNotes();
+const maxCount = Math.max(1, ...tags.map((t) => t.notes.length));
+---
+
+<Base title="タグ一覧">
+  <main class="page page-narrow">
+    <div class="hero">
+      <h1>🏷️ タグ一覧 ({tags.length})</h1>
+    </div>
+    <div class="tag-cloud">
+      {tags.map(({ tag, notes }) => (
+        <a
+          class="tag-cloud-item"
+          style={`font-size:${(0.85 + 0.6 * (notes.length / maxCount)).toFixed(2)}em`}
+          href={`/tags/${encodeURIComponent(tag)}/`}
+        >#{tag}<span class="tag-count">{notes.length}</span></a>
+      ))}
+    </div>
+  </main>
+</Base>

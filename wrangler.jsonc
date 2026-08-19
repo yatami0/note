@@ -1,0 +1,15 @@
+// Cloudflare Workers (static assets のみ・サーバコードなし) の配信設定。
+// デプロイは GitHub Actions 経由 (.github/workflows/deploy.yml)。手元から
+// `wrangler deploy` は打たない。
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "note",
+  "compatibility_date": "2026-08-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  },
+  "routes": [
+    { "pattern": "konohachi.com", "custom_domain": true }
+  ]
+}

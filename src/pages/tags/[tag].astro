@@ -1,0 +1,32 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getNotes, type Note } from '../../lib/notes';
+
+export async function getStaticPaths() {
+  const { tags } = await getNotes();
+  return tags.map(({ tag, notes }) => ({ params: { tag }, props: { tag, notes } }));
+}
+
+interface Props {
+  tag: string;
+  notes: Note[];
+}
+
+const { tag, notes } = Astro.props;
+---
+
+<Base title={`#${tag}`}>
+  <main class="page page-narrow">
+    <div class="hero">
+      <h1>#{tag}</h1>
+    </div>
+    <ul class="note-index">
+      {notes.map((n) => (
+        <li>
+          <a href={`/${n.slug}/`}>{n.title}</a>
+          <span class="note-date">{n.updated.slice(0, 10)}</span>
+        </li>
+      ))}
+    </ul>
+  </main>
+</Base>
