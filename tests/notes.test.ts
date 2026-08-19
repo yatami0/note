@@ -48,6 +48,14 @@ describe('getNotes', () => {
     expect(beta.backlinks.map((b) => b.slug)).toEqual(['alpha']);
   });
 
+  it('発リンクは解決済みのみ・タイトル付きで取れる', () => {
+    const beta = col.notes.find((n) => n.slug === 'beta')!;
+    // missing は解決できないので links に入らない
+    expect(beta.links).toEqual([{ slug: 'alpha', title: 'アルファ' }]);
+    const alpha = col.notes.find((n) => n.slug === 'alpha')!;
+    expect(alpha.links.map((l) => l.slug)).toEqual(['beta']);
+  });
+
   it('壊れた wikilink が from 付きで報告される', () => {
     expect(col.broken).toEqual([{ from: 'beta', target: 'missing' }]);
   });

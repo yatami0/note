@@ -12,6 +12,8 @@ export interface Note {
   tags: string[];
   headings: { depth: number; id: string; text: string }[];
   backlinks: { slug: string; title: string }[];
+  /** このノートが wikilink で参照しているノート (解決済み・自己リンク除外・重複排除) */
+  links: { slug: string; title: string }[];
   /** 一覧カード用の本文抜粋 (プレーンテキスト) */
   excerpt: string;
   hasMermaid: boolean;
@@ -119,6 +121,9 @@ async function build(srcDir: string): Promise<NoteCollection> {
       tags: r.tags,
       headings: r.headings,
       backlinks: [], // 全ノート処理後に確定
+      links: [...new Set(r.links)]
+        .filter((slug) => slug !== raw.slug)
+        .map((slug) => ({ slug, title: titleBySlug.get(slug)! })),
       excerpt: makeExcerpt(raw.body),
       hasMermaid: r.hasMermaid,
       hasMath: r.hasMath,
