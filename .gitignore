@@ -1,6 +1,7 @@
 # ビルド出力。GitHub Actionsがデプロイの度に再生成する。notes/src/ 配下のソースだけをコミットする
 /dist/
 /.astro/
+/.wrangler/
 /node_modules/
 # sync-katex.mjs が node_modules/katex から複製する (ビルド時に再生成)
 /public/katex/

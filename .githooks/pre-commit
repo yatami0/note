@@ -1,12 +1,12 @@
 #!/bin/sh
 # ステージされた notes/src/*.md に作成日・更新日のfrontmatterを刻印し、
-# ビルドを検証パスとして走らせる (壊れた [[wikilink]] はここで警告が出る)。
+# 壊れた [[wikilink]] が無いか軽量チェックする (警告のみ。本検証はCIのビルド)。
 # 有効化: git config core.hooksPath .githooks
 set -e
 
 staged=$(git diff --cached --name-only --diff-filter=ACM -- 'notes/src/*.md')
 [ -z "$staged" ] && exit 0
 
-python3 update_note_dates.py $staged
-python3 build.py
+node scripts/update-note-dates.mjs $staged
+node scripts/check-wikilinks.mjs
 git add notes/src/

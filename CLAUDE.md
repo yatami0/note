@@ -2,7 +2,7 @@
 
 yatami0 個人のノートリポジトリ。Andy Matuschak の「エバーグリーンノート」の考え方を実践する場（詳細は `notes/src/evergreen-notes.md` 参照）。ちょっと調べたこと・考えたこと・AIの調査結果を書き残す場所で、ラフなメモでよい。使い捨てのメモではなく、時間をかけて育ち、他のノートと繋がっていく知識のネットワークを目指す。
 
-`notes/src/*.md` がノートのソースで、`python3 build.py` が静的サイトを `_site/` に生成し、GitHub Actions が GitHub Pages (https://yatami0.github.io/note/) にデプロイする。
+`notes/src/*.md` がノートのソースで、Astro (TypeScript) が静的サイトを `dist/` に生成し、GitHub Actions が Cloudflare Workers (https://note.konohachi.com/) にデプロイする。
 
 （この運用は [tokuhirom/64p.org](https://github.com/tokuhirom/64p.org) のノート運用を参考に、独自実装で再現したもの。）
 
@@ -22,16 +22,15 @@ yatami0 個人のノートリポジトリ。Andy Matuschak の「エバーグリ
 1. `notes/src/` 配下に新しい Markdown ファイルを作る。ファイル名は英数字とハイフンの kebab-case（例: `jwt-bff-pattern.md`）。
 2. 1行目に `# タイトル` の形でタイトルを書く。タイトルは日本語でよい（むしろ日本語で書く）。
 3. 本文はMarkdown。コードスニペットを載せる場合はフェンス付きコードブロックで言語を指定する（` ```python ` のように）。シンタックスハイライトが自動で効く。
-4. 書き終えたら以下を実行してHTMLを再生成し、手元で見た目を確認する。
+4. 書き終えたら以下を実行して手元で見た目を確認する。
 
    ```sh
-   python3 build.py
-   python3 -m http.server -d _site 8000  # http://localhost:8000/ でプレビュー
+   pnpm dev   # http://localhost:4321/ でプレビュー (mdを編集したらブラウザをリロード)
    ```
 
-   `_site/<slug>.html`、`_site/index.html`、`_site/tags/` がまとめて更新される。ただし `_site/` は`.gitignore`されており、GitHub Actions (`.github/workflows/pages.yml`) がデプロイの度に再生成する。手元のプレビュー用であり、コミット対象ではない。
+   本番同等の確認をしたい場合は `pnpm build && pnpm preview`。`dist/` は`.gitignore`されており、GitHub Actions がデプロイの度に再生成する。コミット対象ではない。
 5. `notes/src/*.md`（ソースのみ）をコミットする。`git commit`するとpre-commitフック（`.githooks/pre-commit`）が自動で作成日・更新日のfrontmatterを付与してくれる。
-6. mdのみの変更なら、ブランチを切ってPRを作らずに直接mainへpushしてよい。ビルドロジックやテンプレートなどコードに手を入れた場合は従来通りPRを作る。
+6. ブランチを切ってPRを作る。CIがテスト・ビルドを回し、プレビューURLをPRにコメントする。mainへマージすると https://note.konohachi.com へ自動デプロイされる（mdのみの変更でmainへ直接pushした場合も同様にデプロイされる）。
 
 ## Zettelkasten的な相互リンク
 
@@ -39,7 +38,7 @@ yatami0 個人のノートリポジトリ。Andy Matuschak の「エバーグリ
 
 - `[[jwt-bff-pattern]]` — リンク先ノートのタイトルでリンクが張られる。
 - `[[jwt-bff-pattern|BFFパターンの話]]` — `|`区切りで表示テキストを変えられる。
-- 存在しないファイル名を指定するとビルド時（`python3 build.py`）に警告が出るので気づける。
+- 存在しないファイル名を指定するとビルド時（`pnpm build`）やpre-commitフックで警告が出るので気づける。
 - リンクされた側のノートには「🔗 リンクされているノート」として自動でバックリンクが表示される。手動でメンテする必要はない。
 - コードブロック・インラインコード内の`[[...]]`はリンクとして解釈されない（コード例として安全に書ける）。
 
@@ -55,7 +54,7 @@ yatami0 個人のノートリポジトリ。Andy Matuschak の「エバーグリ
 
 ## `#tag`の仕様
 
-`build.py`はMarkdown本文中の`#tag`をビルド時に`/tags/<tag>.html`へのリンクへ変換し、同じタグを持つノート同士を`/tags/`一覧経由で束ねる（`[[...]]`ウィキリンクとは別の、フラットな関連付け手段）。認識される`#tag`の実際の仕様は以下の通り。
+ビルド（`src/lib/remark/tags.ts`）はMarkdown本文中の`#tag`を`/tags/<tag>/`へのリンクへ変換し、同じタグを持つノート同士を`/tags/`一覧経由で束ねる（`[[...]]`ウィキリンクとは別の、フラットな関連付け手段）。認識される`#tag`の実際の仕様は以下の通り（`tests/pipeline.test.ts`でテストとして固定されている）。
 
 - **使える文字**: `#`の直後は英字(a-z, 大文字小文字問わず)または日本語（漢字・ひらがな・カタカナなど、Unicodeの「文字」全般）で始める。2文字目以降は英数字・アンダースコア・ハイフンに加えて同じくUnicodeの文字が続けられる（例: `#認証認可`, `#ai-agent`, `#claude_code`）。
 - **数字・アンダースコアでは始められない**: `#1234`のようなIssue/PR番号や参照番号をタグと誤認しないための制約。日付や連番を`#tag`として使わないこと。
@@ -63,11 +62,11 @@ yatami0 個人のノートリポジトリ。Andy Matuschak の「エバーグリ
 - **直前が「英数字」だとタグとして認識されない**: `foo#bar`のように単語に`#`が直接くっついている場合はURLフラグメント(`...#section`)やC#のような固有名詞と区別できないため無視される。一方、句読点や括弧の直後（例: `文末。#tag`, `見出し）#tag`）はタグとして認識される。見出し行(`# タイトル`)は`#`の直後が空白なので誤認識されない。
 - **タグはコードブロック・数式ブロック・URL内では展開されない**。コード例中の`#include`や`#!/usr/bin/env`、URL中の`#fragment`（`https://example.com/page/#section`のような形）が誤爆することはない。
 - 複数タグを付ける場合は`#tag1 #tag2`のように半角スペース区切りで並べる（本文末尾にまとめて置くのが通例）。
-- `/tags/`（サイドバーの「🏷️ タグ一覧」からアクセス可）で全タグをタグクラウド形式で一覧できる。タグページ・タグ一覧ページも`python3 build.py`で自動生成される。手動でのメンテは不要。
+- `/tags/`（ヘッダの「🏷️ タグ」からアクセス可）で全タグをタグクラウド形式で一覧できる。タグページ・タグ一覧ページもビルドで自動生成される。手動でのメンテは不要。
 
 ## ノート内のmermaid図
 
-ノートでは` ```mermaid `のフェンス付きコードブロックを書くと、ビルド時に`<div class="mermaid">`へ変換され、閲覧時にmermaid.js(jsdelivr CDNから遅延読み込み)がクライアントサイドで図としてレンダリングする。ネットワーク構成図・シーケンス図・状態遷移など、文章やASCIIアートより図の方が伝わる内容には積極的に使うこと。
+ノートでは` ```mermaid `のフェンス付きコードブロックを書くと、ビルド時（`src/lib/remark/mermaid.ts`）に`<div class="mermaid">`へ変換され、閲覧時にmermaid.js(jsdelivr CDNから遅延読み込み)がクライアントサイドで図としてレンダリングする。ネットワーク構成図・シーケンス図・状態遷移など、文章やASCIIアートより図の方が伝わる内容には積極的に使うこと。
 
 - mermaidブロックを含むノートのページだけがmermaid.jsを読み込む（他のページには影響なし）。
 - ダーク/ライトテーマの切替に自動で追従して再レンダリングされる。
@@ -75,7 +74,7 @@ yatami0 個人のノートリポジトリ。Andy Matuschak の「エバーグリ
 
 ## ノート内の数式(KaTeX)
 
-ノートでは`$$...$$`（ディスプレイ数式）と`\(...\)`（インライン数式）のTeX記法を書くと、ビルド時に`<div class="math-display">`/`<span class="math-inline">`へ変換され、閲覧時にKaTeX(jsdelivr CDNから遅延読み込み)がクライアントサイドでレンダリングする。数学・信号処理・物理などのトピックでは、数式をコードブロックやユニコード文字で代用せず、この記法で書くこと。
+ノートでは`$$...$$`（ディスプレイ数式）と`\(...\)`（インライン数式）のTeX記法を書くと、ビルド時にKaTeX（rehype-katex）でHTMLへレンダリングされる（閲覧時のJS実行は不要。CSSは自己ホスト）。数学・信号処理・物理などのトピックでは、数式をコードブロックやユニコード文字で代用せず、この記法で書くこと。
 
 - `$$...$$`は行単位のブロックとして独立した行に書く（複数行可）。`\(...\)`は文中に埋め込める。
 - 数式を含むノートのページだけがKaTeXを読み込む（他のページには影響なし）。
@@ -86,7 +85,7 @@ yatami0 個人のノートリポジトリ。Andy Matuschak の「エバーグリ
 
 X上の発言をきっかけにノートを書き起こす場合は、その投稿を主とした文章構造にすること。「Xでこう言っていた → それを踏まえてこう考えた」の順で書き、地の文で発言内容を要約・言い換えて済ませない。
 
-- 埋め込み: `x.com`または`twitter.com`のステータスURL（例: `https://x.com/i/status/12345`）を他に何も書かず単独の行として貼ると、ビルド時（`build.py`）に自動でX公式ウィジェット(`widgets.js`)によるライブ埋め込みに変換される。Markdownの引用構文(`>`)で本文を手打ちで転記する必要はない。
+- 埋め込み: `x.com`または`twitter.com`のステータスURL（例: `https://x.com/i/status/12345`）を他に何も書かず単独の行として貼ると、ビルド時（`src/lib/remark/tweets.ts`）に自動でX公式ウィジェット(`widgets.js`)によるライブ埋め込みに変換される。Markdownの引用構文(`>`)で本文を手打ちで転記する必要はない。
 - 埋め込みの直後（または前）に、自分の考察を独立したセクション（例: `## 考えたこと`）として続ける。
 
 ## URLを渡されたときのノート化方針
@@ -108,7 +107,7 @@ updated: 2026-08-18 12:34
 ---
 ```
 
-- `git commit`時にpre-commitフック（`.githooks/pre-commit` → `update_note_dates.py`）が、ステージされた`notes/src/*.md`について、新規ファイルなら`created`/`updated`を追加、既存ファイルなら`updated`だけ現在時刻に更新する。
+- `git commit`時にpre-commitフック（`.githooks/pre-commit` → `scripts/update-note-dates.mjs`）が、ステージされた`notes/src/*.md`について、新規ファイルなら`created`/`updated`を追加、既存ファイルなら`updated`だけ現在時刻に更新する。
 - ファイルの`stat()`のmtimeには依存していない（新規cloneやCIでのビルドではmtimeが壊れるため）。frontmatterが無い場合のみmtimeにフォールバックする。
 - ノート本文やタイトルと同様、`created`/`updated`を手で書き換える必要は基本的にない。
 
@@ -149,16 +148,19 @@ updated: 2026-08-18 12:34
 ## 初回セットアップ
 
 ```sh
-pip install -r requirements.txt        # markdownパッケージのみ
+pnpm install                           # Node.js >= 22 / pnpm が必要
 git config core.hooksPath .githooks    # 作成日・更新日の自動付与フックを有効化
 ```
 
-GitHub Pages は Settings → Pages → Source を「GitHub Actions」にしておくこと（初回のみ）。
+デプロイには GitHub Secrets の `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` が必要（初回のみ設定）。
 
 ## 関連ファイル
 
 - `notes/src/*.md` — ノートのMarkdownソース（先頭にcreated/updatedのYAML frontmatter）
-- `build.py` — ビルドロジック（wikiリンク・タグ・バックリンク・mermaid・KaTeX・RSS・HTML生成のすべて）
-- `static/notes.css` / `static/notes.js` — スタイルとサイドバー検索・テーマ切替
-- `.githooks/pre-commit` / `update_note_dates.py` — pre-commitフックによる作成日・更新日自動付与
-- `.github/workflows/pages.yml` — GitHub Pagesへのビルド&デプロイ
+- `src/lib/pipeline.ts` + `src/lib/remark/` `src/lib/rehype/` — md変換パイプライン（wikiリンク・タグ・mermaid・KaTeX・X埋め込み）
+- `src/lib/notes.ts` — 全ノートの読み込み・バックリンク/タグ集約
+- `src/pages/` `src/layouts/` `src/styles/` — ページ生成（一覧/ノート/タグ/RSS/sitemap/検索インデックス）とUI
+- `tests/` — 変換ルールの仕様テスト（Vitest。#tagやwikilinkの認識ルールを変えるときはここも更新）
+- `.githooks/pre-commit` / `scripts/update-note-dates.mjs` — pre-commitフックによる作成日・更新日自動付与
+- `.github/workflows/ci.yml` / `deploy.yml` — PR時のテスト+プレビュー / mainマージ時のCloudflareデプロイ
+- `wrangler.jsonc` — Cloudflare Workers (static assets) の配信設定
