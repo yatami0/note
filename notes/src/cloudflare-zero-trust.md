@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 02:25
-updated: 2026-08-19 02:25
+updated: 2026-08-19 02:32
 ---
 # Cloudflare Zero Trust
 
@@ -52,13 +52,13 @@ sequenceDiagram
 2. Zero TrustダッシュボードでAccessアプリケーションを作り、ポリシー「自分のメールアドレスのみ許可」を付ける
 3. 開発サーバ・管理画面・Grafana・自宅NASのWeb UIなどが「HTTPSで公開されているが自分しか入れない」状態になる
 
-⚠️ **バイパス経路を残さない**こと。オリジンにTunnel以外の経路（直接届くグローバルIP・開放ポート）が残っていると、Accessは素通しされる。対策は①そもそもTunnel専用にしてリッスンをlocalhostに絞る、②オリジン側でも`Cf-Access-Jwt-Assertion`のJWT検証を行う（[[zero-trust|ゼロトラスト]]の「前段を信頼しすぎない」の実践）。
+⚠️ **バイパス経路を残さない**こと。オリジンにTunnel以外の経路（直接届くグローバルIP・開放ポート）が残っていると、Accessは素通しされる。対策は①そもそもTunnel専用にしてリッスンをlocalhostに絞る、②オリジン側でも`Cf-Access-Jwt-Assertion`のJWT検証を行う（[[zero-trust|ゼロトラスト]]の「前段を信頼しすぎない」の実践）、③オリジンをCloudflare経由の接続しか受けない設定にする（Authenticated Origin Pulls、[[mtls]]参照）。
 
 料金（2026年8月時点）: Zero Trustは**50ユーザーまで無料**（クレジットカード不要・期間制限なし）。無料枠はログ保持24時間などの制約はあるが、Access・Tunnel・Gatewayの中核機能は使える。超過後は$7/ユーザー/月のPay-as-you-go。
 
 ## [[web-auth-moc|Webアプリ認証認可MOC]]の中での位置づけ
 
-[[zero-trust]]の概念を個人規模で体験できる実装。認証を自作せずアプリの前段に外付けする点で、[[bff-pattern|BFF]]がアプリ内でやることの「インフラ版」。
+[[zero-trust]]の概念を個人規模で体験できる実装（元祖は[[beyondcorp]]のAccess Proxy）。認証を自作せずアプリの前段に外付けする点で、[[bff-pattern|BFF]]がアプリ内でやることの「インフラ版」。コードごとCloudflareのエッジに置く選択肢は[[cloudflare-workers]]。
 
 ## 出典
 
