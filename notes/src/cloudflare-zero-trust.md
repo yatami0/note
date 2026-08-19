@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 02:25
-updated: 2026-08-19 02:32
+updated: 2026-08-19 07:07
 ---
 # Cloudflare Zero Trust
 
@@ -58,7 +58,7 @@ sequenceDiagram
 
 ## [[web-auth-moc|Webアプリ認証認可MOC]]の中での位置づけ
 
-[[zero-trust]]の概念を個人規模で体験できる実装（元祖は[[beyondcorp]]のAccess Proxy）。認証を自作せずアプリの前段に外付けする点で、[[bff-pattern|BFF]]がアプリ内でやることの「インフラ版」。コードごとCloudflareのエッジに置く選択肢は[[cloudflare-workers]]。
+[[zero-trust]]の概念を個人規模で体験できる実装（元祖は[[beyondcorp]]のAccess Proxy）。認証を自作せずアプリの前段に外付けする点で、[[bff-pattern|BFF]]がアプリ内でやることの「インフラ版」。コードごとCloudflareのエッジに置く選択肢は[[cloudflare-workers]]。Cloudflare製品群の全体像は[[cloudflare-moc]]。
 
 ## 出典
 

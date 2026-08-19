@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 02:32
-updated: 2026-08-19 05:55
+updated: 2026-08-19 07:07
 ---
 # Cloudflare Workers
 
@@ -31,8 +31,8 @@ Workersは環境変数的な「binding」経由でCloudflareのデータサー�
 | サービス | 何か | 向く用途 |
 |---|---|---|
 | **KV** | 結果整合のキー値ストア（読み取り特化） | 設定・キャッシュ・セッション参照 |
-| **D1** | SQLite互換のSQL DB | 小〜中規模のリレーショナルデータ |
-| **R2** | S3互換オブジェクトストレージ（**egress無料**） | 画像・ファイル配信 |
+| **[[cloudflare-d1|D1]]** | SQLite互換のSQL DB | 小〜中規模のリレーショナルデータ |
+| **[[cloudflare-r2|R2]]** | S3互換オブジェクトストレージ（**egress無料**） | 画像・ファイル配信 |
 | **[[durable-objects|Durable Objects]]** | 単一インスタンス保証の強整合ステートフルオブジェクト | WebSocket・カウンタ・調整役 |
 | **Queues** / **Cron Triggers** | 非同期ジョブ・定期実行 | バッチ処理 |
 
@@ -54,6 +54,10 @@ Workersは環境変数的な「binding」経由でCloudflareのデータサー�
 - Pagesが今も適するのは「純粋な静的サイトをGit pushだけで運用したい」ケース。既存Pagesプロジェクトを慌てて移行する必要はないが、育てるつもりのアプリはWorkersで始めるのが無難
 
 個人開発での使い分けの目安: 自宅マシンやVPSで動くものを公開したいなら[[cloudflare-zero-trust|Tunnel]]（コードはそのまま、入口だけCloudflare）、コード自体をCloudflareに置いてしまうならWorkers。Workersのアプリに認証を外付けしたい場合もAccessが前段に置ける。
+
+## [[cloudflare-moc|Cloudflare MOC]]の中での位置づけ
+
+Workers系スタックの中心。状態は[[durable-objects]]・[[cloudflare-d1|D1]]・[[cloudflare-r2|R2]]に外出しする。
 
 ## 出典
 
