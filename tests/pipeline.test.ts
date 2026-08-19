@@ -38,6 +38,22 @@ describe('wikilinks', () => {
     expect(r.links).toEqual([]);
   });
 
+  it('テーブルセル内の [[slug|label]] も | で分断されずリンクになる', async () => {
+    const r = await render(
+      '| 構成 | 種別 |\n|---|---|\n| [[jwt-bff-pattern|BFF]]+Redis | reference |\n| [[oidc]] | concept |',
+    );
+    expect(r.html).toContain('<a href="/jwt-bff-pattern/">BFF</a>');
+    expect(r.html).toContain('<a href="/oidc/">OIDC (OpenID Connect)</a>');
+    expect(r.links.sort()).toEqual(['jwt-bff-pattern', 'oidc']);
+    expect(r.html).toContain('<table>');
+  });
+
+  it('コードブロック内の [[slug|label]] はエスケープも変換もされない', async () => {
+    const r = await render('```\n[[jwt-bff-pattern|BFF]]\n```');
+    expect(r.html).toContain('[[jwt-bff-pattern|BFF]]');
+    expect(r.links).toEqual([]);
+  });
+
   it('コードブロック・インラインコード内の [[...]] は変換されない', async () => {
     const r = await render('```\n[[jwt-bff-pattern]]\n```\n\nそして `[[oidc]]` はコード。');
     expect(r.html).not.toContain('<a href="/jwt-bff-pattern/"');

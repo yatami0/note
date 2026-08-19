@@ -9,7 +9,8 @@ import remarkRehype from 'remark-rehype';
 import { unified, type Processor } from 'unified';
 import { VFile } from 'vfile';
 import { rehypeHeadings } from './rehype/headings.js';
-import { preprocessMathParens, remarkMathFlag } from './remark/math-parens.js';
+import { remarkMathFlag } from './remark/math-parens.js';
+import { preprocessSource } from './remark/preprocess.js';
 import { remarkMermaid } from './remark/mermaid.js';
 import { remarkTags } from './remark/tags.js';
 import { remarkTweets } from './remark/tweets.js';
@@ -60,7 +61,7 @@ export function createProcessor(titleBySlug: ReadonlyMap<string, string>): NoteP
 }
 
 export async function renderNote(processor: NoteProcessor, source: string): Promise<RenderResult> {
-  const file = new VFile({ value: preprocessMathParens(source) });
+  const file = new VFile({ value: preprocessSource(source) });
   const result = await processor.process(file);
   const data = file.data as NoteFileData;
   return {
