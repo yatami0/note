@@ -1,6 +1,6 @@
 # note
 
-yatami0 の個人ノート。`notes/src/*.md` に書いたメモを Astro (TypeScript) が静的サイトに変換し、GitHub Actions が Cloudflare Workers (static assets) の https://note.konohachi.com へデプロイする。
+yatami0 の個人ノート。`notes/src/*.md` に書いたメモを Astro (TypeScript) が静的サイトに変換し、GitHub Actions が Cloudflare Workers (static assets) の https://konohachi.com へデプロイする。
 
 wikiリンク(`[[...]]`)・バックリンク・`#tag`・mermaid図・KaTeX数式・全文検索に対応。運用ルールの詳細は [CLAUDE.md](CLAUDE.md) を参照。
 

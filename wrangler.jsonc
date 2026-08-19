@@ -10,6 +10,6 @@
     "not_found_handling": "404-page"
   },
   "routes": [
-    { "pattern": "note.konohachi.com", "custom_domain": true }
+    { "pattern": "konohachi.com", "custom_domain": true }
   ]
 }

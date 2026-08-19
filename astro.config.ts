@@ -2,6 +2,6 @@ import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: 'https://note.konohachi.com',
+  site: 'https://konohachi.com',
   integrations: [sitemap()],
 });

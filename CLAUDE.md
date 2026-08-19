@@ -2,7 +2,7 @@
 
 yatami0 個人のノートリポジトリ。Andy Matuschak の「エバーグリーンノート」の考え方を実践する場（詳細は `notes/src/evergreen-notes.md` 参照）。ちょっと調べたこと・考えたこと・AIの調査結果を書き残す場所で、ラフなメモでよい。使い捨てのメモではなく、時間をかけて育ち、他のノートと繋がっていく知識のネットワークを目指す。
 
-`notes/src/*.md` がノートのソースで、Astro (TypeScript) が静的サイトを `dist/` に生成し、GitHub Actions が Cloudflare Workers (https://note.konohachi.com/) にデプロイする。
+`notes/src/*.md` がノートのソースで、Astro (TypeScript) が静的サイトを `dist/` に生成し、GitHub Actions が Cloudflare Workers (https://konohachi.com/) にデプロイする。
 
 （この運用は [tokuhirom/64p.org](https://github.com/tokuhirom/64p.org) のノート運用を参考に、独自実装で再現したもの。）
 
@@ -30,7 +30,7 @@ yatami0 個人のノートリポジトリ。Andy Matuschak の「エバーグリ
 
    本番同等の確認をしたい場合は `pnpm build && pnpm preview`。`dist/` は`.gitignore`されており、GitHub Actions がデプロイの度に再生成する。コミット対象ではない。
 5. `notes/src/*.md`（ソースのみ）をコミットする。`git commit`するとpre-commitフック（`.githooks/pre-commit`）が自動で作成日・更新日のfrontmatterを付与してくれる。
-6. ブランチを切ってPRを作る。CIがテスト・ビルドを回し、プレビューURLをPRにコメントする。mainへマージすると https://note.konohachi.com へ自動デプロイされる（mdのみの変更でmainへ直接pushした場合も同様にデプロイされる）。
+6. ブランチを切ってPRを作る。CIがテスト・ビルドを回し、プレビューURLをPRにコメントする。mainへマージすると https://konohachi.com へ自動デプロイされる（mdのみの変更でmainへ直接pushした場合も同様にデプロイされる）。
 
 ## Zettelkasten的な相互リンク
 
