@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 23:36
-updated: 2026-08-19 23:36
+updated: 2026-08-19 23:48
 ---
 # Cloudflare OS
 
@@ -55,7 +55,7 @@ READMEが挙げる帰結は2つ。
 
 READMEいわく「supercharged MCP servers」。エージェントやgadgetを外部リソースに繋ぐとき、そのアクセスを管理するGatekeeperが作られる。サービスごとに専用のソフトウェアで、役割は次の通り。
 
-- そのサービスのネイティブAPIをラップして、綺麗なCap'n Web APIを提供する
+- そのサービスのネイティブAPIをラップして、綺麗な[[capnweb|Cap'n Web]] APIを提供する
 - 認可（OAuth等）を処理する
 - **利用者が意図した特定のリソースだけ**に絞ってアクセスさせる
 - gadget／エージェントの全アクションをログに残す
@@ -93,7 +93,7 @@ sequenceDiagram
 
 ### introduction（紹介）モデル
 
-エージェントもgadgetも、既定では**何にもアクセスできない**。ワークスペースに外部アカウントを設定してあっても、自動では使えない。使わせたいリソースを都度「紹介（introduce）」する必要がある。
+エージェントもgadgetも、既定では**何にもアクセスできない**（[[capability-security|capabilityベースのセキュリティ]]）。ワークスペースに外部アカウントを設定してあっても、自動では使えない。使わせたいリソースを都度「紹介（introduce）」する必要がある。
 
 - リンクを貼る、あるいはUIから「add resource」で選ぶ
 - エージェント側から「これが要る」と紹介を要求することもでき、人間が許可／拒否する
@@ -104,7 +104,7 @@ MCPサーバを事前に設定しておく一般的なエージェントハー�
 
 gadgetは既定でインターネットに一切出られない。
 
-- **サーバ側**: インターネットアクセスを無効化したDynamic Worker上で動く。明示的に指定した外部リソースとだけ、Workers Bindings経由で通信できる
+- **サーバ側**: インターネットアクセスを無効化した[[dynamic-workers|Dynamic Worker]]上で動く。明示的に指定した外部リソースとだけ、Workers Bindings経由で通信できる
 - **クライアント側**: サンドボックス化されたiframe。親フレームへの`postMessage()`越しのCap'n Web RPCセッションでしか自分のサーバと話せない。それ以外はCSPとiframe sandbox属性でブラウザが許す限り遮断
 
 ## 「実際にOSっぽい」対応関係
@@ -124,17 +124,17 @@ READMEにある対応表。
 
 バックエンドは実際にカーネル的な仕事をしている——ユーザーをプログラムとデバイス（gadgetとGatekeeper）に繋ぎ、アプリをサンドボックス化してアクセス制御を強制する。Gatekeeperが外部サービスへの接続を担うのはドライバがデバイスを担うのと同じ、という見立て。
 
-最後の行（従来OSに対応物がない「エージェント」）がこのプロジェクトの主張で、**AIエージェントは単なるユーザーとして扱えない**という立場を取る。エージェントは人間のユーザーに対して説明責任を負いつつ、それ自身の制限された権限を持つ必要がある。そしてエージェントはその場でコードを書いて実行するので、適した security model はACLではなく**capabilityベース**である、と。
+最後の行（従来OSに対応物がない「エージェント」）がこのプロジェクトの主張で、**AIエージェントは単なるユーザーとして扱えない**という立場を取る。エージェントは人間のユーザーに対して説明責任を負いつつ、それ自身の制限された権限を持つ必要がある。そしてエージェントはその場でコードを書いて実行するので、適した security model はACLではなく**[[capability-security|capabilityベース]]**である、と。
 
 ## アーキテクチャ: Workersの最先端機能の実地デモ
 
 Workersチーム自身が書いていて、Dynamic WorkersやFacetsなど**いくつかの機能はCloudflare OSのためにランタイムへ追加された**とREADMEに書かれている。「Workersランタイムチームが考えるWorkersの使い方」を読むのに良い題材、という位置づけ。
 
 - ワークスペース1つ＝1つの[[durable-objects|Durable Object]]
-- gadget 1つ＝1つのDynamic Worker Facet
+- gadget 1つ＝1つの[[dynamic-workers|Dynamic Worker Facet]]
 - Gatekeeperも各ワークスペースにfacetを差し込んで外部サービスへのアクセスを管理する
-- gadgetのクライアント／サーバ間通信は**Cap'n Web RPC**必須。これによりサーバ側は自動的にエージェントから叩けるAPIになる（MCPサーバを別途書かなくてよい）
-- エージェントは**Code Mode**方式。ツールを呼ぶのではなく、コード片を書いてその場で実行することでタスクをこなす
+- gadgetのクライアント／サーバ間通信は**[[capnweb|Cap'n Web]] RPC**必須。これによりサーバ側は自動的にエージェントから叩けるAPIになる（MCPサーバを別途書かなくてよい）
+- エージェントは**[[code-mode|Code Mode]]**方式。ツールを呼ぶのではなく、コード片を書いてその場で実行することでタスクをこなす
 - リアルタイム共同編集はDurable Objectsが土台。コーディングエージェントが頼まなくても既定で実装してしまう、と書かれている
 - LLMプロバイダは`pi-agent-core`で抽象化されていて選択可能（自前ホストのモデルも含む）
 - エディタはMonaco、コード同期・履歴リプレイにYjs、開発ループにVite
@@ -163,6 +163,13 @@ pnpm run-local   # http://localhost:8787
 ## [[cloudflare-moc]]の中での位置づけ
 
 MOCの2系統（Zero Trust系 / Workers系）のどちらでもなく、**Workers系の上に載るアプリケーションの実例**という第3の層。個人開発の文脈では「Workersでこういうものが作れる」というリファレンス実装として読む価値がある。
+
+このノートから切り出した要素技術は次の4つ。
+
+- [[dynamic-workers]] — gadgetを隔離して動かす実行基盤（Worker Loader / Durable Object Facets）
+- [[capnweb]] — gadgetのクライアント／サーバ間通信であり、Gatekeeperが露出するAPIの形式
+- [[code-mode]] — エージェントがコードを書いて実行する方式
+- [[capability-security]] — Gatekeeperと紹介モデルの背景にある考え方
 
 ## 出典
 

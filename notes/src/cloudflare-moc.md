@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 07:07
-updated: 2026-08-19 23:36
+updated: 2026-08-19 23:48
 ---
 # Cloudflare開発プラットフォームの見取り図（MOC）
 
@@ -19,9 +19,13 @@ Cloudflare関連の原子ノートの見取り図。個人開発の文脈では�
 - [[cloudflare-d1]] — SQLiteベースのサーバレスSQL DB。普通のアプリDB担当
 - [[cloudflare-r2]] — S3互換オブジェクトストレージ。egress無料
 
-## Workers系の上に載るもの
+## エージェントを動かす層
 
-- [[cloudflare-os]] — Cloudflare社内発のAIエージェント作業環境（2026年8月にApache 2.0で公開）。Workers/Durable Objects/Dynamic Workerで書かれたアプリで、「Workersでここまで作れる」のリファレンス実装として読める
+- [[cloudflare-os]] — Cloudflare社内発のAIエージェント作業環境（2026年8月にApache 2.0で公開）。以下の要素技術を全部使って組み上げたアプリで、「Workersでここまで作れる」のリファレンス実装として読める
+- [[dynamic-workers]] — 実行時に決まったコードをisolateで隔離実行する。Worker Loader / Durable Object Facets
+- [[code-mode]] — ツール呼び出しの代わりにコードを書かせるエージェントの作り方
+- [[capnweb]] — スキーマ不要のobject-capability RPC。promise pipeliningで往復を潰す
+- [[capability-security]] — 上3つに共通する背景。渡された参照だけが権限になる
 
 ## 使い分けの早見
 

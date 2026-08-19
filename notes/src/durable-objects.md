@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 05:55
-updated: 2026-08-19 23:36
+updated: 2026-08-19 23:48
 ---
 # Durable Objects
 
@@ -46,7 +46,7 @@ const res = await stub.fetch(request);
 
 ## 実アプリでの使われ方の例
 
-[[cloudflare-os|Cloudflare OS]]（CloudflareがOSS公開したAIエージェント作業環境）では、**ワークスペース1つ＝Durable Object 1つ**が基本単位。その中でユーザーが作った小さなアプリ（gadget）はDynamic Worker Facetとして動き、外部サービスへの接続を仲介するGatekeeperもワークスペースのDOにfacetを差し込む形をとる。リアルタイム共同編集がDOの上でほぼ自明に実装できる、という性質もそのまま使われている。
+[[cloudflare-os|Cloudflare OS]]（CloudflareがOSS公開したAIエージェント作業環境）では、**ワークスペース1つ＝Durable Object 1つ**が基本単位。その中でユーザーが作った小さなアプリ（gadget）は[[dynamic-workers|Dynamic Worker Facet]]として動き、外部サービスへの接続を仲介するGatekeeperもワークスペースのDOにfacetを差し込む形をとる。リアルタイム共同編集がDOの上でほぼ自明に実装できる、という性質もそのまま使われている。
 
 ## [[cloudflare-moc|Cloudflare MOC]]の中での位置づけ
 

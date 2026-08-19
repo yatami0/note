@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 02:32
-updated: 2026-08-19 23:36
+updated: 2026-08-19 23:48
 ---
 # Cloudflare Workers
 
@@ -59,7 +59,7 @@ Workersは環境変数的な「binding」経由でCloudflareのデータサー�
 
 Workers系スタックの中心。状態は[[durable-objects]]・[[cloudflare-d1|D1]]・[[cloudflare-r2|R2]]に外出しする。
 
-Workersで実際に何が組めるかの大規模な実例としては[[cloudflare-os|Cloudflare OS]]（Workersチーム自身が書いたAIエージェント作業環境。Dynamic WorkersやFacetsはこのために追加された機能）がある。
+実行時に決まったコードを隔離して動かす[[dynamic-workers|Dynamic Workers]]もWorkersの拡張として位置づけられる。Workersで実際に何が組めるかの大規模な実例としては[[cloudflare-os|Cloudflare OS]]（Workersチーム自身が書いたAIエージェント作業環境。Dynamic WorkersやFacetsはこのために追加された機能）がある。
 
 ## 出典
 
