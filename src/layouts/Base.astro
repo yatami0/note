@@ -52,10 +52,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     </header>
 
     <dialog id="search-dialog" class="search-dialog">
-      <div id="search"></div>
-      <p class="search-note" id="search-note" hidden>
-        検索インデックスが見つかりません (dev サーバでは <code>pnpm build && pnpm preview</code> で確認できます)。
-      </p>
+      <input
+        type="search"
+        id="search-input"
+        placeholder="ノートを全文検索..."
+        autocomplete="off"
+      />
+      <ul id="search-results" class="search-results"></ul>
     </dialog>
 
     <slot />
@@ -81,27 +84,69 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         } catch (e) {}
       });
 
-      // 検索: Pagefind UI (ビルド後に /pagefind/ が生成される)。初回オープン時に遅延ロード。
+      // 検索: /search-index.json (ビルド時生成) を初回オープン時に取得し、
+      // タイトル・タグ・全文のサブストリング一致で探す (日本語の複合語にも効く)
       (function () {
         var dialog = document.getElementById('search-dialog');
-        var loaded = false;
+        var input = document.getElementById('search-input');
+        var list = document.getElementById('search-results');
+        var index = null;
+
         function load() {
-          if (loaded) return;
-          loaded = true;
-          var css = document.createElement('link');
-          css.rel = 'stylesheet';
-          css.href = '/pagefind/pagefind-ui.css';
-          document.head.appendChild(css);
-          var js = document.createElement('script');
-          js.src = '/pagefind/pagefind-ui.js';
-          js.onload = function () {
-            new PagefindUI({ element: '#search', showSubResults: true, autofocus: true });
-          };
-          js.onerror = function () {
-            document.getElementById('search-note').hidden = false;
-          };
-          document.body.appendChild(js);
+          if (index) return;
+          fetch('/search-index.json')
+            .then(function (r) { return r.json(); })
+            .then(function (data) { index = data; run(); });
         }
+
+        function excerpt(text, pos, len) {
+          var start = Math.max(0, pos - 30);
+          var s = (start > 0 ? '…' : '') + text.slice(start, pos + len + 90);
+          return s.length > 150 ? s.slice(0, 150) + '…' : s;
+        }
+
+        function run() {
+          var q = input.value.trim().toLowerCase();
+          list.textContent = '';
+          if (!index || q.length < 2) return;
+          var hits = [];
+          for (var i = 0; i < index.length; i++) {
+            var n = index[i];
+            var inTitle = n.title.toLowerCase().indexOf(q);
+            var inTags = n.tags.some(function (t) { return t.toLowerCase().indexOf(q) !== -1; });
+            var inText = n.text.toLowerCase().indexOf(q);
+            if (inTitle === -1 && !inTags && inText === -1) continue;
+            hits.push({
+              n: n,
+              score: (inTitle !== -1 ? 100 : 0) + (inTags ? 50 : 0) + (inText !== -1 ? 1 : 0),
+              ex: inText !== -1 ? excerpt(n.text, inText, q.length) : n.text.slice(0, 120),
+            });
+          }
+          hits.sort(function (a, b) { return b.score - a.score; });
+          hits.slice(0, 20).forEach(function (h) {
+            var li = document.createElement('li');
+            var a = document.createElement('a');
+            a.href = '/' + h.n.slug + '/';
+            a.textContent = h.n.title;
+            var date = document.createElement('span');
+            date.className = 'note-date';
+            date.textContent = ' ' + h.n.updated;
+            var p = document.createElement('p');
+            p.textContent = h.ex;
+            li.appendChild(a);
+            li.appendChild(date);
+            li.appendChild(p);
+            list.appendChild(li);
+          });
+          if (hits.length === 0) {
+            var empty = document.createElement('li');
+            empty.className = 'search-empty';
+            empty.textContent = '「' + input.value.trim() + '」に一致するノートはありません';
+            list.appendChild(empty);
+          }
+        }
+
+        input.addEventListener('input', run);
         document.getElementById('search-open').addEventListener('click', function () {
           load();
           dialog.showModal();

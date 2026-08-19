@@ -29,14 +29,13 @@
     "@astrojs/check": "^0.9.10",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
-    "pagefind": "^1.5.2",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10",
     "wrangler": "^4.123.0"
   },
   "scripts": {
     "dev": "node scripts/sync-katex.mjs && astro dev",
-    "build": "node scripts/sync-katex.mjs && astro build && pagefind --site dist",
+    "build": "node scripts/sync-katex.mjs && astro build",
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run",

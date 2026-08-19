@@ -21,7 +21,7 @@ const tocHeadings = note.headings.filter((h) => h.depth <= 3);
   </Fragment>
   <div class="note-page">
     <main class="note-main">
-      <article class="note-content" data-pagefind-body set:html={note.html} />
+      <article class="note-content" set:html={note.html} />
       {note.backlinks.length > 0 && (
         <aside class="note-backlinks">
           <h2>🔗 リンクされているノート</h2>
