@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 07:07
-updated: 2026-08-19 07:07
+updated: 2026-08-19 23:36
 ---
 # Cloudflare開発プラットフォームの見取り図（MOC）
 
@@ -19,6 +19,10 @@ Cloudflare関連の原子ノートの見取り図。個人開発の文脈では�
 - [[cloudflare-d1]] — SQLiteベースのサーバレスSQL DB。普通のアプリDB担当
 - [[cloudflare-r2]] — S3互換オブジェクトストレージ。egress無料
 
+## Workers系の上に載るもの
+
+- [[cloudflare-os]] — Cloudflare社内発のAIエージェント作業環境（2026年8月にApache 2.0で公開）。Workers/Durable Objects/Dynamic Workerで書かれたアプリで、「Workersでここまで作れる」のリファレンス実装として読める
+
 ## 使い分けの早見
 
 | やりたいこと | 使うもの |
@@ -28,5 +32,6 @@ Cloudflare関連の原子ノートの見取り図。個人開発の文脈では�
 | リアルタイム協調・WebSocket | Durable Objects |
 | リレーショナルデータ | D1 |
 | 画像・ファイル | R2 |
+| 社内向けのAIエージェント環境が欲しい | Cloudflare OS（Workersの上に載るアプリ） |
 
 #moc #cloudflare #個人開発

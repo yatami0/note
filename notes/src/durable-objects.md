@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 05:55
-updated: 2026-08-19 07:07
+updated: 2026-08-19 23:36
 ---
 # Durable Objects
 
@@ -43,6 +43,10 @@ const res = await stub.fetch(request);
 - 無料プランでも使える（SQLiteバックエンド。ストレージは無料枠合計5GBまで、課金は2026年1月から有効化された）
 - 「WebSocketサーバを立てたいがVPSを管理したくない」に対する現実解。Workersだけでは詰まる「状態の置き場」問題（[[cloudflare-workers]]参照）の答えがこれ
 - 対比: 認証のような「各エッジが独立に検証できる」処理は[[stateless-session|ステートレス]]に寄せ、「合流が必要な状態」だけDOに寄せる、という使い分けになる
+
+## 実アプリでの使われ方の例
+
+[[cloudflare-os|Cloudflare OS]]（CloudflareがOSS公開したAIエージェント作業環境）では、**ワークスペース1つ＝Durable Object 1つ**が基本単位。その中でユーザーが作った小さなアプリ（gadget）はDynamic Worker Facetとして動き、外部サービスへの接続を仲介するGatekeeperもワークスペースのDOにfacetを差し込む形をとる。リアルタイム共同編集がDOの上でほぼ自明に実装できる、という性質もそのまま使われている。
 
 ## [[cloudflare-moc|Cloudflare MOC]]の中での位置づけ
 
