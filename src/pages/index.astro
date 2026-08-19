@@ -1,0 +1,20 @@
+---
+import NoteCard from '../components/NoteCard.astro';
+import Base from '../layouts/Base.astro';
+import { getNotes } from '../lib/notes';
+import { SITE_TITLE } from '../lib/site';
+
+const { notes } = await getNotes();
+---
+
+<Base>
+  <main class="page">
+    <div class="hero">
+      <h1>{SITE_TITLE}</h1>
+      <p>調べたこと・考えたことを書き残すノート。更新日の新しい順。</p>
+    </div>
+    <ul class="note-cards">
+      {notes.map((note) => <NoteCard note={note} />)}
+    </ul>
+  </main>
+</Base>

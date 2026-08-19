@@ -1,0 +1,76 @@
+---
+import Base from '../layouts/Base.astro';
+import { getNotes, type Note } from '../lib/notes';
+
+export async function getStaticPaths() {
+  const { notes } = await getNotes();
+  return notes.map((note) => ({ params: { slug: note.slug }, props: { note } }));
+}
+
+interface Props {
+  note: Note;
+}
+
+const { note } = Astro.props;
+const tocHeadings = note.headings.filter((h) => h.depth <= 3);
+---
+
+<Base title={note.title} description={note.excerpt} ogType="article">
+  <Fragment slot="head">
+    {note.hasMath && <link rel="stylesheet" href="/katex/katex.min.css" />}
+  </Fragment>
+  <div class="note-page">
+    <main class="note-main">
+      <article class="note-content" data-pagefind-body set:html={note.html} />
+      {note.backlinks.length > 0 && (
+        <aside class="note-backlinks">
+          <h2>🔗 リンクされているノート</h2>
+          <ul>
+            {note.backlinks.map((b) => (
+              <li><a href={`/${b.slug}/`}>{b.title}</a></li>
+            ))}
+          </ul>
+        </aside>
+      )}
+      <div class="note-meta">
+        <span>作成日時: {note.created}</span>
+        <span>更新日時: {note.updated}</span>
+      </div>
+    </main>
+    {tocHeadings.length > 1 && (
+      <nav class="note-toc">
+        <div class="note-toc-inner">
+          <p class="toc-title">目次</p>
+          <ul>
+            {tocHeadings.map((h) => (
+              <li class={`depth-${h.depth}`}><a href={`#${h.id}`}>{h.text}</a></li>
+            ))}
+          </ul>
+        </div>
+      </nav>
+    )}
+  </div>
+  {note.hasMermaid && (
+    <script type="module" is:inline>
+      // mermaid はクライアントサイドで描画し、テーマ切替に追従して再レンダリングする
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+      const root = document.documentElement;
+      const divs = document.querySelectorAll('div.mermaid');
+      divs.forEach((d) => { d.dataset.src = d.textContent; });
+      function isDark() {
+        const t = root.getAttribute('data-theme');
+        return t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+      function render() {
+        mermaid.initialize({ startOnLoad: false, theme: isDark() ? 'dark' : 'default' });
+        divs.forEach((d) => { d.textContent = d.dataset.src; d.removeAttribute('data-processed'); });
+        mermaid.run({ nodes: divs });
+      }
+      new MutationObserver(render).observe(root, { attributeFilter: ['data-theme'] });
+      render();
+    </script>
+  )}
+  {note.hasTweet && (
+    <script async is:inline src="https://platform.twitter.com/widgets.js" charset="utf-8" />
+  )}
+</Base>

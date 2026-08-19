@@ -1,0 +1,122 @@
+---
+import { AUTHOR_URL, SITE_AUTHOR, SITE_DESCRIPTION, SITE_TITLE } from '../lib/site';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** OGP の og:type。ノートページは article */
+  ogType?: 'website' | 'article';
+}
+
+const { title, description = SITE_DESCRIPTION, ogType = 'website' } = Astro.props;
+const pageTitle = title === undefined ? SITE_TITLE : `${title} - ${SITE_TITLE}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title={SITE_TITLE} href="/rss.xml" />
+    <meta property="og:title" content={title ?? SITE_TITLE} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={SITE_TITLE} />
+    <meta name="twitter:card" content="summary" />
+    <script is:inline>
+      try {
+        var t = localStorage.getItem('theme');
+        if (t) document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    </script>
+    <slot name="head" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="site-title" href="/">{SITE_TITLE}</a>
+        <nav class="site-nav">
+          <button id="search-open" type="button">🔍 検索</button>
+          <a href="/tags/">🏷️ タグ</a>
+          <a href="/rss.xml">📡 RSS</a>
+          <button id="theme-toggle" type="button" title="テーマ切替">🌓</button>
+        </nav>
+      </div>
+    </header>
+
+    <dialog id="search-dialog" class="search-dialog">
+      <div id="search"></div>
+      <p class="search-note" id="search-note" hidden>
+        検索インデックスが見つかりません (dev サーバでは <code>pnpm build && pnpm preview</code> で確認できます)。
+      </p>
+    </dialog>
+
+    <slot />
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <a href={AUTHOR_URL}>{SITE_AUTHOR}</a> の個人的な調査メモです。
+        正確な記述に努めていますが、正確性を保証するものではありません。
+      </div>
+    </footer>
+
+    <script is:inline>
+      // テーマ切替: 明示的に選ぶと data-theme + localStorage に保存し、OS設定より優先される
+      document.getElementById('theme-toggle').addEventListener('click', function () {
+        var root = document.documentElement;
+        var current =
+          root.getAttribute('data-theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        var next = current === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try {
+          localStorage.setItem('theme', next);
+        } catch (e) {}
+      });
+
+      // 検索: Pagefind UI (ビルド後に /pagefind/ が生成される)。初回オープン時に遅延ロード。
+      (function () {
+        var dialog = document.getElementById('search-dialog');
+        var loaded = false;
+        function load() {
+          if (loaded) return;
+          loaded = true;
+          var css = document.createElement('link');
+          css.rel = 'stylesheet';
+          css.href = '/pagefind/pagefind-ui.css';
+          document.head.appendChild(css);
+          var js = document.createElement('script');
+          js.src = '/pagefind/pagefind-ui.js';
+          js.onload = function () {
+            new PagefindUI({ element: '#search', showSubResults: true, autofocus: true });
+          };
+          js.onerror = function () {
+            document.getElementById('search-note').hidden = false;
+          };
+          document.body.appendChild(js);
+        }
+        document.getElementById('search-open').addEventListener('click', function () {
+          load();
+          dialog.showModal();
+        });
+        dialog.addEventListener('click', function (e) {
+          if (e.target === dialog) dialog.close();
+        });
+        document.addEventListener('keydown', function (e) {
+          if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            e.preventDefault();
+            load();
+            dialog.open ? dialog.close() : dialog.showModal();
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
