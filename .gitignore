@@ -1,0 +1,7 @@
+# `python3 build.py` のビルド出力。GitHub Actionsがデプロイの度に再生成する
+# (.github/workflows/pages.yml)。notes/src/ 配下のソースだけをコミットする。
+/_site/
+
+__pycache__/
+.DS_Store
+**/.DS_Store
