@@ -1,6 +1,6 @@
 ---
 created: 2026-08-18 14:03
-updated: 2026-08-18 14:03
+updated: 2026-08-19 20:19
 ---
 # Next.jsのRSC/Server Actionsとトークン露出
 
@@ -34,7 +34,7 @@ Next.jsはクロージャ変数を**ビルドごとの秘密鍵で暗号化**し
 
 ### RSCペイロードに載るのは「結果」だけ、ただしpropsは全部載る
 
-Server Component内で`fetch(url, { headers: { Authorization: token } })`しても、HTML/RSCペイロードに載るのはレンダリングに使われたデータであり、リクエストヘッダのトークン自体は載らない。**ただし**:
+[[react-server-components|Server Component]]内で`fetch(url, { headers: { Authorization: token } })`しても、HTML/RSCペイロードに載るのはレンダリングに使われたデータであり、リクエストヘッダのトークン自体は載らない。**ただし**:
 
 - **Client Component（`"use client"`）のpropsに渡したものすべて**がRSCペイロードとしてブラウザに届く
 - **画面に表示していなくても、propsに渡した「オブジェクト丸ごと」**が載る。`<Profile user={user} />`の`user`に機微フィールドが含まれていればペイロードに入る。米政府サイトがRSCペイロード経由で非表示の個人情報を漏らした実例が報告されている

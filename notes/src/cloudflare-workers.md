@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 02:32
-updated: 2026-08-19 07:07
+updated: 2026-08-19 20:19
 ---
 # Cloudflare Workers
 
@@ -49,7 +49,7 @@ Workersは環境変数的な「binding」経由でCloudflareのデータサー�
 | 静的配信 | 本体 | **Workers Static Assetsで対応済み**（ここで差が消えた） |
 | Durable Objects・Cron等 | 使えない/制限あり | フル対応 |
 
-- もともと「静的サイトはPages、APIはWorkers」という棲み分けだったが、**Workersが静的アセット配信を取り込んだ**ことで、1つのWorkerでフロントエンドとバックエンドを両方持てるようになった
+- もともと「静的サイトはPages、APIはWorkers」という棲み分けだったが、**Workersが静的アセット配信を取り込んだ**ことで、1つのWorkerでフロントエンドとバックエンドを両方持てるようになった（このノートサイト自身が[[astro|Astro]]で静的生成したものをWorkers Static Assetsに載せている）
 - Cloudflare自身が**新規プロジェクトにはWorkersを推奨**しており、新機能はWorkers側にだけ入る。Next.jsをCloudflareに載せる公式ルートも`@opennextjs/cloudflare`でWorkersにデプロイする形
 - Pagesが今も適するのは「純粋な静的サイトをGit pushだけで運用したい」ケース。既存Pagesプロジェクトを慌てて移行する必要はないが、育てるつもりのアプリはWorkersで始めるのが無難
 
