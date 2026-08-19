@@ -1,6 +1,6 @@
 ---
 created: 2026-08-18 14:03
-updated: 2026-08-18 14:03
+updated: 2026-08-19 02:25
 ---
 # client_credentialsグラント（M2M認証）
 
@@ -8,7 +8,7 @@ OAuthの**グラント＝トークンをもらう手続きの種類**のうち�
 
 | グラント | 使う場面 | トークンの`sub`（主体） |
 |---|---|---|
-| Authorization Code + OIDC | **人間**がブラウザでログイン | ユーザー個人 |
+| Authorization Code + [[oidc|OIDC]] | **人間**がブラウザでログイン | ユーザー個人 |
 | **client_credentials** | **人間が介在しない**プログラム同士 | アプリ/サービス自身 |
 
 ```

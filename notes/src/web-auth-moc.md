@@ -1,6 +1,6 @@
 ---
 created: 2026-08-18 14:03
-updated: 2026-08-18 14:03
+updated: 2026-08-19 02:25
 ---
 # Webアプリ認証認可の見取り図（MOC）
 
@@ -11,6 +11,12 @@ Webアプリケーションの認証認可（トークンの置き場所・セ�
 - [[session-id-vs-jwt]] — 全議論の土台。reference vs capability、「形式」と「置き場所」の2軸分離、資格情報の危険度3要素
 - [[jwt-stateless-availability]] — JWTの署名検証がなぜ外部I/Oゼロなのか、「可用性が高い」の正確な意味
 - [[token-revocation]] — ステートレス性の対価。denylist/allowlist、失効チェック位置のスペクトラム、expの決め方
+
+## 基盤プロトコル・運用
+
+- [[oidc]] — 「認可のOAuth」の上に載る「認証のレイヤー」。IDトークンとアクセストークンの区別
+- [[pkce]] — 認可コード横取り攻撃への防御。OAuth 2.1で全クライアント必須へ
+- [[jwks-key-rotation]] — 公開鍵の配布と世代交代。kid追従キャッシュと重ね置きローテーション
 
 ## ブラウザアプリの構成パターン
 
@@ -30,6 +36,11 @@ Webアプリケーションの認証認可（トークンの置き場所・セ�
 - [[oauth-client-credentials]] — M2M認証の標準形と「誰の操作か」が消える限界
 - [[oidc-federation]] — ユーザー単位の証跡とSSOを標準形で満たす。責務の4層分解
 - [[oauth-token-exchange]] — 相手の認証を変えられないときの両替カード
+
+## ゼロトラスト
+
+- [[zero-trust]] — 「ネットワーク上の位置を信頼の根拠にしない」原則。NIST SP 800-207
+- [[cloudflare-zero-trust]] — Access/Tunnelによる実践。個人開発でポートを開けずに認証付き公開
 
 ## 要件・意思決定
 

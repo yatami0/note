@@ -1,10 +1,10 @@
 ---
 created: 2026-08-18 14:03
-updated: 2026-08-18 14:03
+updated: 2026-08-19 02:25
 ---
 # IDフェデレーション（認証連携）
 
-複数のアプリ・組織にまたがるユーザー認証を、**共通のIdPにログインを委ねる**ことで束ねる方式。アプリを共通IdPのOAuth/OIDCクライアントとして登録し、ユーザーのログインをOIDC（Authorization Code Flow）で共通IdPに委ねる。トークンには**IdPが署名保証したユーザー本人**（`sub`）と経由アプリ（`azp`/`client_id`）が載る。
+複数のアプリ・組織にまたがるユーザー認証を、**共通のIdPにログインを委ねる**ことで束ねる方式。アプリを共通IdPのOAuth/OIDCクライアントとして登録し、ユーザーのログインを[[oidc|OIDC]]（Authorization Code Flow + [[pkce|PKCE]]）で共通IdPに委ねる。トークンには**IdPが署名保証したユーザー本人**（`sub`）と経由アプリ（`azp`/`client_id`）が載る。
 
 ```mermaid
 sequenceDiagram
