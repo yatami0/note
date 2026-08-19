@@ -1,0 +1,67 @@
+---
+import Base from '../layouts/Base.astro';
+import { INITIAL_STATE, renderApp, type GraphNote } from '../lib/connections-view';
+import { getNotes } from '../lib/notes';
+
+const { notes } = await getNotes();
+const graphNotes: GraphNote[] = notes.map((n) => ({
+  slug: n.slug,
+  title: n.title,
+  tags: n.tags,
+  out: n.links.map((l) => l.slug),
+}));
+const linkCount = graphNotes.reduce((sum, n) => sum + n.out.length, 0);
+// JSON を <script> に埋めるので < をエスケープしておく (</script> 誤終端対策)
+const dataJson = JSON.stringify(graphNotes).replace(/</g, '\\u003c');
+const initialHtml = renderApp(graphNotes, INITIAL_STATE);
+---
+
+<Base title="概念のつながり" description="ノートのつながりを抽象→具体の層で見る">
+  <main class="page">
+    <div class="hero">
+      <h1>概念のつながり</h1>
+      <p>
+        {notes.length}ノート / {linkCount}本のリンク。
+        被リンクの多いノートを上に置いている。上にあるほど多くの概念の前提になっている概念、下にいくほど個別具体の話。
+      </p>
+      <div class="cx-legend">
+        <span><b>←</b> このノートを前提にしている（被リンク）</span>
+        <span><b>→</b> このノートが前提にしている（リンク先）</span>
+      </div>
+    </div>
+    <div id="connections-app" set:html={initialHtml} />
+  </main>
+</Base>
+
+<script type="application/json" id="connections-data" set:html={dataJson} />
+
+<script>
+  import { INITIAL_STATE, renderApp, type ViewState } from '../lib/connections-view';
+
+  const app = document.getElementById('connections-app')!;
+  const notes = JSON.parse(document.getElementById('connections-data')!.textContent!);
+  let state: ViewState = structuredClone(INITIAL_STATE);
+
+  app.addEventListener('click', (e) => {
+    const el = (e.target as Element).closest<HTMLElement>('[data-act]');
+    if (el === null || !app.contains(el)) return;
+    const act = el.dataset.act;
+    if (act === 'select') {
+      // JSなしではカードはノートへのリンクとして働く。JSありでは選択トグル。
+      e.preventDefault();
+      const slug = el.dataset.slug!;
+      state.selected = state.selected === slug ? null : slug;
+    } else if (act === 'lens') {
+      state = { lens: el.dataset.tag ?? null, selected: null, expanded: [] };
+    } else if (act === 'expand') {
+      state.expanded.push(el.dataset.tier!);
+    } else if (act === 'collapse') {
+      state.expanded = state.expanded.filter((k) => k !== el.dataset.tier);
+    } else if (act === 'clear') {
+      state.selected = null;
+    } else {
+      return;
+    }
+    app.innerHTML = renderApp(notes, state);
+  });
+</script>
