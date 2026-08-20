@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 23:36
-updated: 2026-08-19 23:48
+updated: 2026-08-20 00:14
 ---
 # Cloudflare OS
 
@@ -12,6 +12,8 @@ READMEの言い方では「OS」は2つの意味で使われている。
 - **AIワークロードのためのOS** — 従来のOSが計算ワークロードを管理するのと同じ意味で
 
 Cloudflare社内では実際に全社的に使われていて（エンジニアリングから営業まで）、それを外に出したもの。公開リポジトリはv1の学びを踏まえた完全な書き直しのv2で、2026年8月時点では「early access」と明記されている。
+
+作者のKenton Vardaは公開時に「10年前の自分のスタートアップ[[sandstorm|Sandstorm.io]]のリメイクだ」と書いている。設計の由来はそちらのノートを参照。
 
 > The idea is not that your company uses Cloudflare OS, but rather that you make it "*Your Company* OS".
 
@@ -53,7 +55,7 @@ READMEが挙げる帰結は2つ。
 
 ## Gatekeeper: capabilityベースのセキュリティ層
 
-READMEいわく「supercharged MCP servers」。エージェントやgadgetを外部リソースに繋ぐとき、そのアクセスを管理するGatekeeperが作られる。サービスごとに専用のソフトウェアで、役割は次の通り。
+READMEいわく「supercharged [[mcp|MCP]] servers」。エージェントやgadgetを外部リソースに繋ぐとき、そのアクセスを管理するGatekeeperが作られる。サービスごとに専用のソフトウェアで、役割は次の通り。
 
 - そのサービスのネイティブAPIをラップして、綺麗な[[capnweb|Cap'n Web]] APIを提供する
 - 認可（OAuth等）を処理する
@@ -98,7 +100,7 @@ sequenceDiagram
 - リンクを貼る、あるいはUIから「add resource」で選ぶ
 - エージェント側から「これが要る」と紹介を要求することもでき、人間が許可／拒否する
 
-MCPサーバを事前に設定しておく一般的なエージェントハーネスでは、全チャットで全サービスへの広いアクセスが常時（ambientに）与えられてしまう。それに対し、紹介モデルは**その仕事に必要な分だけ**にエージェントを縛る。[[session-id-vs-jwt|reference vs capability]]の議論と同じで、「持っているだけで行使できる」ものをどこまで配るかの設計。
+[[mcp|MCP]]サーバを事前に設定しておく一般的なエージェントハーネスでは、全チャットで全サービスへの広いアクセスが常時（ambientに）与えられてしまう。それに対し、紹介モデルは**その仕事に必要な分だけ**にエージェントを縛る。[[session-id-vs-jwt|reference vs capability]]の議論と同じで、「持っているだけで行使できる」ものをどこまで配るかの設計。
 
 ### サンドボックスの実装
 
@@ -124,7 +126,7 @@ READMEにある対応表。
 
 バックエンドは実際にカーネル的な仕事をしている——ユーザーをプログラムとデバイス（gadgetとGatekeeper）に繋ぎ、アプリをサンドボックス化してアクセス制御を強制する。Gatekeeperが外部サービスへの接続を担うのはドライバがデバイスを担うのと同じ、という見立て。
 
-最後の行（従来OSに対応物がない「エージェント」）がこのプロジェクトの主張で、**AIエージェントは単なるユーザーとして扱えない**という立場を取る。エージェントは人間のユーザーに対して説明責任を負いつつ、それ自身の制限された権限を持つ必要がある。そしてエージェントはその場でコードを書いて実行するので、適した security model はACLではなく**[[capability-security|capabilityベース]]**である、と。
+最後の行（従来OSに対応物がない「エージェント」）がこのプロジェクトの主張で、**AIエージェントは単なるユーザーとして扱えない**という立場を取る。エージェントは人間のユーザーに対して説明責任を負いつつ、それ自身の制限された権限を持つ必要がある。そしてエージェントはその場でコードを書いて実行するので、適した security model はACLではなく**capabilityベース**（[[capability-security]]）である、と。
 
 ## アーキテクチャ: Workersの最先端機能の実地デモ
 
@@ -133,8 +135,8 @@ Workersチーム自身が書いていて、Dynamic WorkersやFacetsなど**い�
 - ワークスペース1つ＝1つの[[durable-objects|Durable Object]]
 - gadget 1つ＝1つの[[dynamic-workers|Dynamic Worker Facet]]
 - Gatekeeperも各ワークスペースにfacetを差し込んで外部サービスへのアクセスを管理する
-- gadgetのクライアント／サーバ間通信は**[[capnweb|Cap'n Web]] RPC**必須。これによりサーバ側は自動的にエージェントから叩けるAPIになる（MCPサーバを別途書かなくてよい）
-- エージェントは**[[code-mode|Code Mode]]**方式。ツールを呼ぶのではなく、コード片を書いてその場で実行することでタスクをこなす
+- gadgetのクライアント／サーバ間通信は[[capnweb|Cap'n Web]] RPCが**必須**。これによりサーバ側は自動的にエージェントから叩けるAPIになる（MCPサーバを別途書かなくてよい）
+- エージェントは[[code-mode|Code Mode]]方式。ツールを呼ぶのではなく、コード片を書いてその場で実行することでタスクをこなす
 - リアルタイム共同編集はDurable Objectsが土台。コーディングエージェントが頼まなくても既定で実装してしまう、と書かれている
 - LLMプロバイダは`pi-agent-core`で抽象化されていて選択可能（自前ホストのモデルも含む）
 - エディタはMonaco、コード同期・履歴リプレイにYjs、開発ループにVite
@@ -154,7 +156,7 @@ pnpm run-local   # http://localhost:8787
 - Node.js 24.19+ / pnpm 11.17 / TypeScript 7
 - ホスト名設定用のCloudflareゾーン
 
-サインインは**[[cloudflare-zero-trust|Cloudflare Access]]のself-hostedアプリケーション**として設定し、そのaudience tagを`deployment.jsonc`に書く。つまり認証は自前実装ではなくAccessに寄せる構成になっている。
+サインインは[[cloudflare-zero-trust|Cloudflare Access]]の**self-hostedアプリケーション**として設定し、そのaudience tagを`deployment.jsonc`に書く。つまり認証は自前実装ではなくAccessに寄せる構成になっている。
 
 自前サーバでのセルフホストは、workerd（OSSのWorkersランタイム）の上で動く前提ではあるものの、ドキュメントとツールは「COMING SOON」。
 

@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 23:48
-updated: 2026-08-19 23:48
+updated: 2026-08-20 00:14
 ---
 # capabilityベースのセキュリティ
 
@@ -55,7 +55,7 @@ Principle of Least Authority。各主体には、その仕事に必要な権限�
 - **Unixのファイルディスクリプタ** — 一度openしたfdは、パスの権限チェックを再度通らずに使える。「名前」ではなく「参照」で対象を持つという点でcapabilityに近い性質を持つ、と昔から指摘されてきた
 - **Capsicum**（FreeBSD） — そのfdの性質を徹底したサンドボックス機構。capability modeに入るとプロセスは**グローバル名前空間（ファイルシステムのパス、PID等）へのアクセスを失い**、既に持っているfdだけが権限になる。fd自体にも細かい権利（rights）を付けられる
 - **seL4** — capabilityベースのマイクロカーネル。あらゆるオブジェクトへのアクセスが適切なcapabilityによって認可される必要がある。形式検証されている
-- **object-capability model (ocap)** — オブジェクト指向言語の上でこれをやる。オブジェクト同士はメッセージパッシングでしか相互作用せず、参照は偽造できない。[[capnweb|Cap'n Web]]やCap'n Protoはこの系譜
+- **object-capability model (ocap)** — オブジェクト指向言語の上でこれをやる。オブジェクト同士はメッセージパッシングでしか相互作用せず、参照は偽造できない。[[capnweb|Cap'n Web]]やCap'n Protoはこの系譜で、Cap'n Protoを土台にプラットフォーム全体をcapabilityで作った実例が[[sandstorm]]
 
 ## AIエージェントの文脈で再浮上している理由
 
@@ -63,7 +63,7 @@ Principle of Least Authority。各主体には、その仕事に必要な権限�
 
 具体的な現れ方:
 
-- **MCPサーバの一般的な設定は逆側にある** — 起動時に全サーバを繋いでおく形なので、どのチャットでも全サービスへの広いアクセスが常時ambientに効く。Cloudflare OSはこれを「introduction（紹介）」モデルに置き換え、その仕事に必要なリソースだけを都度渡す
+- **[[mcp|MCP]]サーバの一般的な設定は逆側にある** — 起動時に全サーバを繋いでおく形なので、どのチャットでも全サービスへの広いアクセスが常時ambientに効く。Cloudflare OSはこれを「introduction（紹介）」モデルに置き換え、その仕事に必要なリソースだけを都度渡す
 - **[[dynamic-workers|Dynamic Workers]]のbindings** — サンドボックスに渡すのはURLやAPIキーではなくstub。Cloudflareのドキュメントは「stubs have no global identifier and cannot be forged（stubにはグローバルな識別子がなく、偽造できない）」と書いていて、これはcapabilityの定義そのもの
 - **[[code-mode|Code Mode]]のサンドボックス** — 既定でネットワークを遮断し、渡された名前空間経由でしか外に出られない
 

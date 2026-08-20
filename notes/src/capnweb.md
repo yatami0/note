@@ -1,10 +1,10 @@
 ---
 created: 2026-08-19 23:48
-updated: 2026-08-19 23:48
+updated: 2026-08-20 00:14
 ---
 # Cap'n Web
 
-JavaScriptネイティブのRPCシステム。Cap'n Protoと同じ作者（Kenton Varda）による「精神的な兄弟」で、Webスタックに合わせて作り直したもの。[[cloudflare-os|Cloudflare OS]]ではgadgetのクライアント／サーバ間通信に**必須の通信手段**として使われている。
+JavaScriptネイティブのRPCシステム。Cap'n Protoと同じ作者（Kenton Varda）による「精神的な兄弟」で、Webスタックに合わせて作り直したもの。Cap'n Protoはもともと[[sandstorm|Sandstorm]]というcapabilityベースのアプリホスティング基盤のために作られたRPCで、その系譜がここまで繋がっている。[[cloudflare-os|Cloudflare OS]]ではgadgetのクライアント／サーバ間通信に**必須の通信手段**として使われている。
 
 ## 何が違うのか
 
@@ -105,7 +105,7 @@ const [profile, friendProfiles] =
 [[cloudflare-os]]では、gadgetのクライアントとサーバの通信をCap'n Web RPCに限定している。理由は2つあるとREADMEに書かれている。
 
 1. ボイラープレートが極端に少ないので、**エージェントが書きやすい**（サーバにメソッドを定義してクライアントから呼ぶだけ）
-2. その結果、サーバ側は必然的に**理解しやすいAPIを露出する**ことになる。エージェントはそのAPIをそのまま叩けるので、MCPサーバを別途書かなくても「作ったアプリの中でAIと共同作業する」が成立する
+2. その結果、サーバ側は必然的に**理解しやすいAPIを露出する**ことになる。エージェントはそのAPIをそのまま叩けるので、[[mcp|MCP]]サーバを別途書かなくても「作ったアプリの中でAIと共同作業する」が成立する
 
 [[code-mode|Code Mode]]でツール呼び出しの代わりにコードを書かせる方式と噛み合っていて、gadgetのAPIはそのままサンドボックス内から呼べる対象になる。
 

@@ -1,10 +1,10 @@
 ---
 created: 2026-08-19 23:48
-updated: 2026-08-19 23:48
+updated: 2026-08-20 00:14
 ---
 # Code Mode
 
-LLMにツールを直接呼ばせるのではなく、**ツール群をTypeScript APIとして提示して、それを呼ぶコードを書かせ、サンドボックスで実行する**というエージェントの作り方。Cloudflareが2025年9月の "Code Mode: the better way to use MCP" で提唱し、`@cloudflare/codemode`パッケージと[[dynamic-workers|Dynamic Workers]]で実装している。[[cloudflare-os|Cloudflare OS]]のエージェントもこの方式。
+LLMにツールを直接呼ばせるのではなく、**ツール群をTypeScript APIとして提示して、それを呼ぶコードを書かせ、サンドボックスで実行する**というエージェントの作り方。Cloudflareが2025年9月の "Code Mode: the better way to use [[mcp|MCP]]" で提唱し、`@cloudflare/codemode`パッケージと[[dynamic-workers|Dynamic Workers]]で実装している。[[cloudflare-os|Cloudflare OS]]のエージェントもこの方式。
 
 ## なぜコードのほうが上手いのか
 
