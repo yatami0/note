@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 20:19
-updated: 2026-08-19 20:19
+updated: 2026-08-20 00:16
 ---
 # Astro
 
@@ -72,7 +72,7 @@ Astro自体はUIフレームワークを持たず、島の中身としてReact�
 
 ## このノートサイト自体の構成
 
-[[cloudflare-workers|Cloudflare Workers]]の静的アセット配信に載せている（`https://konohachi.com/`）。Markdownをremark/rehypeパイプラインでHTML化し、Astroが全ページを静的生成する構成で、`client:*`ディレクティブは1つも使っていない＝**UIフレームワークのランタイムを1バイトも配信していない**。テーマ切替・mermaidの遅延読み込み・X埋め込みなど、クライアントJSが要る数箇所は素の`<script>`で書いている。
+[[cloudflare-workers|Cloudflare Workers]]の静的アセット配信に載せている（`https://konohachi.com/`）。Markdownをremark/rehypeパイプラインでHTML化し、Astroが全ページを静的生成する構成で、`client:*`ディレクティブは1つも使っていない＝**UIフレームワークのランタイムを1バイトも配信していない**。テーマ切替・mermaidの遅延読み込み・X埋め込みなど、クライアントJSが要る数箇所は素の`<script>`で書いている。この構成にチャットUIのような本格的なインタラクションを足すときにどこで線を引くかは[[note-llm-chat-design]]で検討している。
 
 これは「Astroだと素のJSに退化する」のではなく、**必要な量に応じて素のscript → 島 → フル機能のフレームワークと段階的に上げられる**（[[progressive-enhancement|プログレッシブエンハンスメント]]）というAstroの設計思想通りの帰結。
 

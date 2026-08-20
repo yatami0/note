@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 02:32
-updated: 2026-08-19 20:19
+updated: 2026-08-20 00:22
 ---
 # Cloudflare Workers
 
@@ -11,7 +11,7 @@ Cloudflareのエッジで動くサーバレス実行環境。世界300超のデ�
 WorkersはLambdaのようなコンテナ/VM起動型ではなく、**V8エンジンのisolate**（Chromeがタブを隔離するのと同じ仕組み）でコードを動かす。
 
 - 1プロセス内に多数のisolateを同居させられるため、起動が数ミリ秒——**コールドスタートが実質ない**
-- 代わりに実行モデルに制約がある: 任意のネイティブバイナリは動かない（JS/TS/Wasm）、CPU時間制限、Node.js APIは互換レイヤーでの部分対応
+- 代わりに実行モデルに制約がある: 任意のネイティブバイナリは動かない（JS/TS/Wasm）、CPU時間制限、Node.js APIは互換レイヤーでの部分対応。なお制限されるのはCPU時間であって待ち時間ではないので、外部APIの応答待ちが主体の中継処理は制限に当たりにくい（[[server-sent-events]]）
 - ランタイム（workerd）はオープンソースで、ローカル開発は`wrangler dev`で同じ環境を再現できる
 
 コードはfetchハンドラが基本形:
@@ -49,7 +49,7 @@ Workersは環境変数的な「binding」経由でCloudflareのデータサー�
 | 静的配信 | 本体 | **Workers Static Assetsで対応済み**（ここで差が消えた） |
 | Durable Objects・Cron等 | 使えない/制限あり | フル対応 |
 
-- もともと「静的サイトはPages、APIはWorkers」という棲み分けだったが、**Workersが静的アセット配信を取り込んだ**ことで、1つのWorkerでフロントエンドとバックエンドを両方持てるようになった（このノートサイト自身が[[astro|Astro]]で静的生成したものをWorkers Static Assetsに載せている）
+- もともと「静的サイトはPages、APIはWorkers」という棲み分けだったが、**Workersが静的アセット配信を取り込んだ**ことで、1つのWorkerでフロントエンドとバックエンドを両方持てるようになった（このノートサイト自身が[[astro|Astro]]で静的生成したものをWorkers Static Assetsに載せている）。静的アセット配信に後からAPIだけ足す具体的な構成は[[worker-protected-api]]
 - Cloudflare自身が**新規プロジェクトにはWorkersを推奨**しており、新機能はWorkers側にだけ入る。Next.jsをCloudflareに載せる公式ルートも`@opennextjs/cloudflare`でWorkersにデプロイする形
 - Pagesが今も適するのは「純粋な静的サイトをGit pushだけで運用したい」ケース。既存Pagesプロジェクトを慌てて移行する必要はないが、育てるつもりのアプリはWorkersで始めるのが無難
 
