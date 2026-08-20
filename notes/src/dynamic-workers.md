@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 23:48
-updated: 2026-08-19 23:48
+updated: 2026-08-20 00:21
 ---
 # Dynamic Workers
 
@@ -118,6 +118,10 @@ Workers有料プランに含まれるのは、月あたり1,000個のユニー�
 ## [[cloudflare-moc]]の中での位置づけ
 
 Workers系スタックの中では「実行基盤そのものを実行時に組み立てる」層。[[durable-objects]]が状態の合流点を作るのに対し、Dynamic Workersは**信頼できないコードの隔離**を担う。[[code-mode]]と[[cloudflare-os]]はどちらもこの上に載っている応用。
+
+## [[ai-agent-moc]]の中での位置づけ
+
+「どこで実行させるか」への答え。[[code-mode]]が生んだ要求を、isolateによる隔離・egress遮断・facetによるストレージ分離で受ける。渡し方の設計は[[capability-security]]。
 
 ## 出典
 

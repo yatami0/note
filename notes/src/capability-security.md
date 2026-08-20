@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 23:48
-updated: 2026-08-20 00:14
+updated: 2026-08-20 00:21
 ---
 # capabilityベースのセキュリティ
 
@@ -72,6 +72,10 @@ Principle of Least Authority。各主体には、その仕事に必要な権限�
 [[session-id-vs-jwt]]で整理した「reference（サーバ側の状態を指すだけ）vs capability（持っているだけで行使できる）」の軸は、まさにこの話。JWTのようなbearer tokenは典型的なcapabilityで、だからこそ**漏洩が即座に権限の獲得になる**（[[xss-token-theft]]）。
 
 ただしocapの立場から見ると、bearer tokenの問題はcapabilityであること自体ではなく、**1つのトークンに広すぎる権限を載せ、それを広い範囲に配ってしまう**運用のほう。[[oauth-token-exchange]]で権限を絞ったトークンに交換してから下流に渡す、[[bff-pattern|BFF]]でブラウザにトークンを置かない、といった設計はPOLAをbearer tokenの世界で近似する試みと読める。
+
+## [[ai-agent-moc]]の中での位置づけ
+
+この地図の土台。他のノートは全部、この原則の実装（[[capnweb]]・[[dynamic-workers]]のbinding・[[sandstorm]]のpowerbox）か、そこからの逸脱（事前接続の[[mcp]]）として読める。
 
 ## 出典
 

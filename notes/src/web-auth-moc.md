@@ -1,6 +1,6 @@
 ---
 created: 2026-08-18 14:03
-updated: 2026-08-19 05:55
+updated: 2026-08-20 00:21
 ---
 # Webアプリ認証認可の見取り図（MOC）
 
@@ -51,5 +51,9 @@ Webアプリケーションの認証認可（トークンの置き場所・セ�
 - [[audit-trail-requirements]] — 方式を最終決定するのは技術ではなくこの要件。出どころ（J-SOX/ITGC等）と確認の最短経路
 - [[browser-token-tradeoff]] — 「得るもの」実在チェックと決定的な質問リスト
 - [[accounting-system-auth-case]] — 上記全部を実案件に適用したケース記録
+
+## 隣接する見取り図
+
+- [[ai-agent-moc]] — 「持っているだけで行使できる資格情報をどこまで配るか」という問いが共通。[[session-id-vs-jwt]]のreference vs capabilityの議論は、そちらでは[[capability-security]]としてOS・エージェントの文脈に展開される
 
 #moc #認証認可 #セキュリティ

@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 23:36
-updated: 2026-08-20 00:14
+updated: 2026-08-20 00:21
 ---
 # Cloudflare OS
 
@@ -166,12 +166,16 @@ pnpm run-local   # http://localhost:8787
 
 MOCの2系統（Zero Trust系 / Workers系）のどちらでもなく、**Workers系の上に載るアプリケーションの実例**という第3の層。個人開発の文脈では「Workersでこういうものが作れる」というリファレンス実装として読む価値がある。
 
-このノートから切り出した要素技術は次の4つ。
+## [[ai-agent-moc]]の中での位置づけ
+
+この地図の実例。このノートから切り出した要素技術が、そのまま地図の構成要素になっている。
 
 - [[dynamic-workers]] — gadgetを隔離して動かす実行基盤（Worker Loader / Durable Object Facets）
 - [[capnweb]] — gadgetのクライアント／サーバ間通信であり、Gatekeeperが露出するAPIの形式
 - [[code-mode]] — エージェントがコードを書いて実行する方式
 - [[capability-security]] — Gatekeeperと紹介モデルの背景にある考え方
+- [[mcp]] — Gatekeeperが「supercharged MCP servers」を名乗る相手
+- [[sandstorm]] — 作者自身による前身。gadget＝grain、紹介＝powerbox
 
 ## 出典
 

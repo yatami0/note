@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 07:07
-updated: 2026-08-19 23:48
+updated: 2026-08-20 00:21
 ---
 # Cloudflare開発プラットフォームの見取り図（MOC）
 
@@ -20,6 +20,8 @@ Cloudflare関連の原子ノートの見取り図。個人開発の文脈では�
 - [[cloudflare-r2]] — S3互換オブジェクトストレージ。egress無料
 
 ## エージェントを動かす層
+
+この層は製品軸を越えて広がったので、別途[[ai-agent-moc]]に「権限をどう渡し、どこで実行させるか」の軸で地図を作ってある。
 
 - [[cloudflare-os]] — Cloudflare社内発のAIエージェント作業環境（2026年8月にApache 2.0で公開）。以下の要素技術を全部使って組み上げたアプリで、「Workersでここまで作れる」のリファレンス実装として読める
 - [[dynamic-workers]] — 実行時に決まったコードをisolateで隔離実行する。Worker Loader / Durable Object Facets
