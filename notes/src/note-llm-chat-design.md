@@ -1,6 +1,6 @@
 ---
 created: 2026-08-20 00:16
-updated: 2026-08-20 00:16
+updated: 2026-08-20 00:22
 ---
 # ノートサイトにLLMチャットを生やす設計
 
@@ -51,7 +51,7 @@ sequenceDiagram
 ## 段階分け
 
 1. **Phase 0（サーバなし）** — ビルド時に`/raw/<slug>.md`を出力、選択→フローティングボタン→`<dialog>`チャット、LLMはBYOキーでブラウザから直接、保存はMarkdownをクリップボードへ。ここまで既存構成を一切壊さない。
-2. **Phase 1** — `/api/chat` Worker + Access + SSEストリーミング。APIキーをサーバ側へ。
+2. **Phase 1** — `/api/chat` Worker + Access + [[server-sent-events|SSE]]ストリーミング。APIキーをサーバ側へ。
 3. **Phase 2** — 保存 → Issue → Actions のノート化エージェント → PR。
 4. **Phase 3** — 選択箇所のアンカリング（`data-src-line`）で既存ノートへのリンク差し込み精度を上げる。
 
