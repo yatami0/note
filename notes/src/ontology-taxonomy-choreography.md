@@ -1,6 +1,6 @@
 ---
 created: 2026-08-21 00:12
-updated: 2026-08-21 00:12
+updated: 2026-08-21 00:15
 ---
 # Ontology / Taxonomy / Choreography（Dan KlynのIAモデル）
 
@@ -37,6 +37,10 @@ Web時代のIA実務を定式化したRosenfeld & Morville『Information Archite
 - Klynモデルは意味→構造→動きという抽象度の高いレイヤー分けで、Web以外（物理空間、API設計など）にも適用される。実際にMike AmundsenがAPI設計文脈でこのモデルを論じている例がある
 
 （この対比の枠組みは複数の解説記事に見られる整理で、Klyn本人が白熊本と明示的に対比した一次資料は見つけられなかった。）
+
+## [[information-design-moc|情報設計・IA MOC]]の中での位置づけ
+
+この領域の**理論の骨格**。意味→配置→動きという3要素は、[[information-architecture|4層モデル]]をより抽象度の高いレイヤーで言い直したものとして読める。第一要素ontologyの厳密版が[[ontology]]。
 
 ## 出典
 
