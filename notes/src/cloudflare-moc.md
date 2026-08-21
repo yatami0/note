@@ -1,6 +1,6 @@
 ---
 created: 2026-08-19 07:07
-updated: 2026-08-20 00:21
+updated: 2026-08-21 23:48
 ---
 # Cloudflare開発プラットフォームの見取り図（MOC）
 
@@ -18,6 +18,7 @@ Cloudflare関連の原子ノートの見取り図。個人開発の文脈では�
 - [[durable-objects]] — 単一インスタンス保証のステートフルオブジェクト。WebSocket・調整役（設計思想は[[actor-model]]）
 - [[cloudflare-d1]] — SQLiteベースのサーバレスSQL DB。普通のアプリDB担当
 - [[cloudflare-r2]] — S3互換オブジェクトストレージ。egress無料
+- [[workers-fullstack-ts-stack]] — 上記を1本のアプリとして串刺しにするフルスタックTS構成例（Xの「俺的最強技術スタック」@R0u9h版）
 
 ## エージェントを動かす層
 
