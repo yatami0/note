@@ -74,6 +74,13 @@ a { color: var(--accent); }
     gap: 1rem;
 }
 
+/* ナビが収まらない幅ではタイトルの下に折り返す (はみ出すとモバイルで
+   レイアウトビューポートが押し広げられ、ページ全体がズームアウトされてしまう) */
+@media (max-width: 520px) {
+    .site-header-inner { flex-wrap: wrap; row-gap: .15rem; padding-top: .5rem; padding-bottom: .5rem; }
+    .site-nav { gap: .7rem; }
+}
+
 .site-title {
     font-weight: 700;
     font-size: 1.05rem;
