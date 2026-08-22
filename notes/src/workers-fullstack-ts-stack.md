@@ -1,6 +1,6 @@
 ---
 created: 2026-08-21 23:48
-updated: 2026-08-21 23:48
+updated: 2026-08-22 00:51
 ---
 # Cloudflare WorkersフルスタックTS構成（俺的最強技術スタック @R0u9h版）
 
@@ -38,7 +38,7 @@ Bunはパッケージマネージャとして使うならOK、ランタイムと
 
 ### Hono RPC
 
-Honoのルート定義から`hc<AppType>()`クライアントが**TypeScriptの型推論だけ**で型安全なAPIクライアントになる仕組み。tRPC的な体験を、コード生成もスキーマ定義もなしにHono本体だけで得られる。サーバ側は`routes`の型を`export type AppType = typeof routes`のようにexportし、フロントは`import type`で参照するだけなので、モノレポ構成と相性がよい。HTTPサーバをHonoにするなら、RPC層のためだけに別ライブラリ（oRPC等）を足さなくてよい、というのが「不要」の中身。
+Honoのルート定義から`hc<AppType>()`クライアントが**TypeScriptの型推論だけ**で型安全なAPIクライアントになる仕組み（このアプローチ全般は[[typescript-rpc|TypeScriptの型共有RPC]]、[[rpc|RPC]]という概念自体はそちらのノート参照）。tRPC的な体験を、コード生成もスキーマ定義もなしにHono本体だけで得られる。サーバ側は`routes`の型を`export type AppType = typeof routes`のようにexportし、フロントは`import type`で参照するだけなので、モノレポ構成と相性がよい。HTTPサーバをHonoにするなら、RPC層のためだけに別ライブラリ（[[typescript-rpc|oRPC]]等）を足さなくてよい、というのが「不要」の中身。
 
 ### Kysely（vs Drizzle）
 
@@ -58,7 +58,7 @@ TanStack StartはTanStack Routerの上にSSR・サーバ関数を足したフル
 ## ツールチェーン
 
 - **Bun** — パッケージマネージャとして
-- **Vite Plus（Vite+）** — VoidZeroの統合ツールチェーン。`vp`の1バイナリにVite / Vitest / Rolldown / tsdown / oxlint / oxfmtとタスクランナーが入り、**pre-commitフック機能も組み込み**で持つ。2026年3月にアルファ、7月にベータでMITライセンスにてOSS化。oxc系に寄せているならlefthookを別途入れる理由が薄い、というのが変更点の根拠
+- **[[vite-plus|Vite Plus（Vite+）]]** — VoidZeroの統合ツールチェーン。`vp`の1バイナリにVite / Vitest / Rolldown / tsdown / oxlint / oxfmtとタスクランナーが入り、**pre-commitフック機能も組み込み**で持つ。2026年3月にアルファ、7月にベータでMITライセンスにてOSS化。oxc系に寄せているならlefthookを別途入れる理由が薄い、というのが変更点の根拠
 - **oxlint / oxfmt** — Rust製（oxc）のlinter / formatter。Vite+経由で使う
 - **Alchemy** — TypeScriptネイティブのIaCライブラリ。追加のツールチェーンやサービスなしにpure TypeScriptでリソースを定義でき、stateはローカルファイルとしてリポジトリに置ける。Cloudflareの場合、定義したリソースからWorkersのbinding型（`env`）が推論されるので`wrangler types`のコード生成が要らなくなる
 

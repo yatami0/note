@@ -1,10 +1,10 @@
 ---
 created: 2026-08-19 23:48
-updated: 2026-08-20 00:21
+updated: 2026-08-22 00:51
 ---
 # Cap'n Web
 
-JavaScriptネイティブのRPCシステム。Cap'n Protoと同じ作者（Kenton Varda）による「精神的な兄弟」で、Webスタックに合わせて作り直したもの。Cap'n Protoはもともと[[sandstorm|Sandstorm]]というcapabilityベースのアプリホスティング基盤のために作られたRPCで、その系譜がここまで繋がっている。[[cloudflare-os|Cloudflare OS]]ではgadgetのクライアント／サーバ間通信に**必須の通信手段**として使われている。
+JavaScriptネイティブの[[rpc|RPC]]システム。Cap'n Protoと同じ作者（Kenton Varda）による「精神的な兄弟」で、Webスタックに合わせて作り直したもの。Cap'n Protoはもともと[[sandstorm|Sandstorm]]というcapabilityベースのアプリホスティング基盤のために作られたRPCで、その系譜がここまで繋がっている。[[cloudflare-os|Cloudflare OS]]ではgadgetのクライアント／サーバ間通信に**必須の通信手段**として使われている。
 
 ## 何が違うのか
 

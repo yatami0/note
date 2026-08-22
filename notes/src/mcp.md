@@ -1,12 +1,12 @@
 ---
 created: 2026-08-20 00:14
-updated: 2026-08-20 00:21
+updated: 2026-08-22 00:51
 ---
 # MCP (Model Context Protocol)
 
 LLMアプリケーションと外部のデータソース・ツールを繋ぐためのオープンなプロトコル。Anthropicが2024年11月に公開し、2025年12月にLinux Foundation傘下の**Agentic AI Foundation (AAIF)** へ寄贈された（Anthropic・Block・OpenAIが共同設立、Google・Microsoft・AWS・Cloudflare・Bloombergが支援。goose、AGENTS.mdと並ぶ創設プロジェクト）。
 
-通信はJSON-RPC 2.0。仕様はTypeScriptのスキーマを正としていて、日付版（`2024-11-05`、`2025-03-26`、`2025-06-18`、`2025-11-25`、`2026-07-28`…）で改訂されていく。
+通信は[[rpc|JSON-RPC]] 2.0。仕様はTypeScriptのスキーマを正としていて、日付版（`2024-11-05`、`2025-03-26`、`2025-06-18`、`2025-11-25`、`2026-07-28`…）で改訂されていく。
 
 ## host / client / server
 
