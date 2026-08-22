@@ -1,0 +1,112 @@
+---
+import type { RelatedNote } from '../lib/notes';
+
+interface Props {
+  related: RelatedNote[];
+}
+
+const { related } = Astro.props;
+
+const REL_LABEL = { mutual: '⇄ 相互リンク', out: '→ 参照先', in: '← 被参照' } as const;
+---
+
+<button
+  type="button"
+  class="related-dock-pill"
+  popovertarget="related-dock-sheet"
+  aria-label={`関連ノートを開く (${related.length}件)`}
+>
+  🔗 関連ノート <span class="cnt">{related.length}</span>
+</button>
+
+<aside id="related-dock-sheet" class="related-dock-sheet" popover="auto" aria-label="関連ノート">
+  <header class="related-dock-head">
+    <span class="related-dock-handle" aria-hidden="true"></span>
+    <p class="related-dock-title">🔗 関連ノート</p>
+    <button type="button" class="related-dock-close" popovertarget="related-dock-sheet" popovertargetaction="hide">
+      閉じる
+    </button>
+  </header>
+  <ul class="related-dock-list">
+    {related.map((r) => (
+      <li>
+        <a href={`/${r.slug}/`}>
+          <span class="related-dock-item-title">{r.title}</span>
+          <span class="related-dock-item-meta">
+            {r.relation && <span class={`related-dock-rel rel-${r.relation}`}>{REL_LABEL[r.relation]}</span>}
+            {r.sharedTags.map((t) => (
+              <span class="related-dock-tag">#{t}</span>
+            ))}
+            <span class="related-dock-date">{r.updated.slice(0, 10)}</span>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+  <a class="related-dock-connections" href="/connections/">🧭 つながりページで全体を見る</a>
+</aside>
+
+<script is:inline>
+  // 関連ノートドック: 開いたまま関連ノートを渡り歩けるよう、開閉状態を
+  // sessionStorage に持ち、遷移先ページでも開いた状態を復元する。
+  // 開閉自体は popover 属性 (popovertarget) なので JS なしでも動く。
+  (function () {
+    var sheet = document.getElementById('related-dock-sheet');
+    if (!sheet) return;
+    if (typeof sheet.showPopover !== 'function') {
+      // popover 非対応: UA スタイルで隠れないので JS で畳んでおく (ピルも意味を失うので隠す)
+      sheet.hidden = true;
+      var pill = document.querySelector('.related-dock-pill');
+      if (pill) pill.hidden = true;
+      return;
+    }
+    var KEY = 'relatedDockOpen';
+
+    try {
+      if (sessionStorage.getItem(KEY) === '1') sheet.showPopover();
+    } catch (e) {}
+
+    sheet.addEventListener('toggle', function (e) {
+      try {
+        if (e.newState === 'open') sessionStorage.setItem(KEY, '1');
+        else sessionStorage.removeItem(KEY);
+      } catch (err) {}
+    });
+
+    // リンクで遷移する瞬間はシートが開いたまま = 次ページでも開く
+    sheet.addEventListener('click', function (e) {
+      if (e.target.closest('a')) {
+        try {
+          sessionStorage.setItem(KEY, '1');
+        } catch (err) {}
+      }
+    });
+
+    // モバイル: ヘッダ部を下にスワイプで閉じる
+    var head = sheet.querySelector('.related-dock-head');
+    var startY = null;
+    head.addEventListener(
+      'touchstart',
+      function (e) {
+        startY = e.touches[0].clientY;
+        sheet.classList.add('dragging');
+      },
+      { passive: true },
+    );
+    head.addEventListener(
+      'touchmove',
+      function (e) {
+        if (startY === null) return;
+        var dy = e.touches[0].clientY - startY;
+        sheet.style.transform = dy > 0 ? 'translateY(' + dy + 'px)' : '';
+      },
+      { passive: true },
+    );
+    head.addEventListener('touchend', function (e) {
+      sheet.classList.remove('dragging');
+      sheet.style.transform = '';
+      if (startY !== null && e.changedTouches[0].clientY - startY > 60) sheet.hidePopover();
+      startY = null;
+    });
+  })();
+</script>

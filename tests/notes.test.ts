@@ -71,6 +71,30 @@ describe('getNotes', () => {
     expect(gamma.created).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
   });
 
+  it('related: 相互リンク+共有タグが最上位、片方向リンクが続く', () => {
+    const alpha = col.notes.find((n) => n.slug === 'alpha')!;
+    // beta とは相互リンク (3) + #shared 共有 (1) = 4、gamma からは被参照のみ (2)
+    expect(alpha.related.map((r) => r.slug)).toEqual(['beta', 'gamma']);
+    expect(alpha.related[0]).toMatchObject({
+      relation: 'mutual',
+      sharedTags: ['shared'],
+      score: 4,
+    });
+    expect(alpha.related[1]).toMatchObject({ relation: 'in', sharedTags: [], score: 2 });
+  });
+
+  it('related: リンクもタグ共有もないノートは含まれない', () => {
+    const beta = col.notes.find((n) => n.slug === 'beta')!;
+    // gamma は beta とリンク関係もタグ共有もない
+    expect(beta.related.map((r) => r.slug)).toEqual(['alpha']);
+  });
+
+  it('related: 発リンクは out として関連に入る', () => {
+    const gamma = col.notes.find((n) => n.slug === 'gamma')!;
+    expect(gamma.related).toHaveLength(1);
+    expect(gamma.related[0]).toMatchObject({ slug: 'alpha', relation: 'out', score: 2 });
+  });
+
   it('excerpt はタイトル・記法抜きのプレーンテキスト', () => {
     const beta = col.notes.find((n) => n.slug === 'beta')!;
     expect(beta.excerpt).not.toContain('[[');

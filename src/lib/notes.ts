@@ -2,6 +2,21 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createProcessor, renderNote } from './pipeline.js';
 
+/** 関連ノートのリンク関係。mutual = 相互リンク, out = 参照先, in = 被参照 */
+export type RelatedRelation = 'mutual' | 'out' | 'in';
+
+export interface RelatedNote {
+  slug: string;
+  title: string;
+  updated: string;
+  /** リンク関係 (タグ共有のみの関連なら null) */
+  relation: RelatedRelation | null;
+  /** 共有しているタグ */
+  sharedTags: string[];
+  /** mutual=3, out/in=2, +共有タグ数。降順で related に並ぶ */
+  score: number;
+}
+
 export interface Note {
   slug: string;
   title: string;
@@ -14,6 +29,8 @@ export interface Note {
   backlinks: { slug: string; title: string }[];
   /** このノートが wikilink で参照しているノート (解決済み・自己リンク除外・重複排除) */
   links: { slug: string; title: string }[];
+  /** リンク関係・タグ共有から算出した関連ノート (スコア降順・上位 RELATED_LIMIT 件) */
+  related: RelatedNote[];
   /** 一覧カード用の本文抜粋 (プレーンテキスト) */
   excerpt: string;
   hasMermaid: boolean;
@@ -33,6 +50,9 @@ export interface NoteCollection {
 // astro dev / build はプロジェクトルートで実行される前提 (import.meta.url は
 // ビルド時にバンドル先 dist/ を指してしまうため使えない)
 const DEFAULT_SRC_DIR = path.resolve(process.cwd(), 'notes/src');
+
+/** 関連ノートとして各ノートに持たせる最大件数 */
+export const RELATED_LIMIT = 8;
 
 interface RawNote {
   slug: string;
@@ -121,6 +141,7 @@ async function build(srcDir: string): Promise<NoteCollection> {
       tags: r.tags,
       headings: r.headings,
       backlinks: [], // 全ノート処理後に確定
+      related: [], // 全ノート処理後に確定
       links: [...new Set(r.links)]
         .filter((slug) => slug !== raw.slug)
         .map((slug) => ({ slug, title: titleBySlug.get(slug)! })),
@@ -135,6 +156,37 @@ async function build(srcDir: string): Promise<NoteCollection> {
     note.backlinks = [...(linkedFrom.get(note.slug) ?? [])]
       .map((slug) => ({ slug, title: titleBySlug.get(slug)! }))
       .sort((a, b) => a.title.localeCompare(b.title, 'ja'));
+  }
+
+  // 関連ノート: リンク関係 (相互3 / 片方向2) + 共有タグ数でスコアリングして上位を持たせる
+  for (const note of notes) {
+    const out = new Set(note.links.map((l) => l.slug));
+    const back = new Set(note.backlinks.map((b) => b.slug));
+    note.related = notes
+      .filter((other) => other.slug !== note.slug)
+      .map((other): RelatedNote => {
+        const linked = out.has(other.slug);
+        const backed = back.has(other.slug);
+        const relation: RelatedRelation | null =
+          linked && backed ? 'mutual' : linked ? 'out' : backed ? 'in' : null;
+        const sharedTags = note.tags.filter((t) => other.tags.includes(t));
+        return {
+          slug: other.slug,
+          title: other.title,
+          updated: other.updated,
+          relation,
+          sharedTags,
+          score: (relation === 'mutual' ? 3 : relation !== null ? 2 : 0) + sharedTags.length,
+        };
+      })
+      .filter((r) => r.score > 0)
+      .sort(
+        (a, b) =>
+          b.score - a.score ||
+          b.updated.localeCompare(a.updated) ||
+          a.title.localeCompare(b.title, 'ja'),
+      )
+      .slice(0, RELATED_LIMIT);
   }
 
   notes.sort((a, b) => b.updated.localeCompare(a.updated));

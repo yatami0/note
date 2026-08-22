@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import RelatedDock from '../components/RelatedDock.astro';
 import { getNotes, type Note } from '../lib/notes';
 
 export async function getStaticPaths() {
@@ -22,16 +23,6 @@ const tocHeadings = note.headings.filter((h) => h.depth <= 3);
   <div class="note-page">
     <main class="note-main">
       <article class="note-content" set:html={note.html} />
-      {note.backlinks.length > 0 && (
-        <aside class="note-backlinks">
-          <h2>🔗 リンクされているノート</h2>
-          <ul>
-            {note.backlinks.map((b) => (
-              <li><a href={`/${b.slug}/`}>{b.title}</a></li>
-            ))}
-          </ul>
-        </aside>
-      )}
       <div class="note-meta">
         <span>作成日時: {note.created}</span>
         <span>更新日時: {note.updated}</span>
@@ -50,6 +41,7 @@ const tocHeadings = note.headings.filter((h) => h.depth <= 3);
       </nav>
     )}
   </div>
+  {note.related.length > 0 && <RelatedDock related={note.related} />}
   {note.hasMermaid && (
     <script type="module" is:inline>
       // mermaid はクライアントサイドで描画し、テーマ切替に追従して再レンダリングする

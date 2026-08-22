@@ -356,18 +356,7 @@ a { color: var(--accent); }
 .mermaid { text-align: center; margin: 1rem 0; }
 .katex-display { margin: 1rem 0; overflow-x: auto; }
 
-/* ---- バックリンク・メタ情報・フッタ ---- */
-
-.note-backlinks {
-    margin-top: 3rem;
-    padding: .75rem 1.1rem;
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-}
-
-.note-backlinks h2 { font-size: .95rem; margin: 0 0 .3rem; border: none; padding: 0; }
-.note-backlinks ul { margin: 0; padding-left: 1.2rem; }
+/* ---- メタ情報・フッタ ---- */
 
 .note-meta {
     margin-top: 1.5rem;
@@ -637,4 +626,223 @@ a { color: var(--accent); }
     text-decoration: none;
     font-weight: 600;
     font-size: .84rem;
+}
+
+/* ---- ページ遷移 (cross-document View Transition) ---- */
+/* 対応ブラウザではノート間の遷移が短いクロスフェードになる。非対応なら通常遷移 */
+
+@view-transition {
+    navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: .18s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation: none;
+    }
+}
+
+/* ---- 関連ノートドック (ノートページのフロートUI) ---- */
+
+.related-dock-pill {
+    position: fixed;
+    z-index: 20;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-family: inherit;
+    font-size: .84rem;
+    font-weight: 600;
+    color: var(--fg);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: .45rem 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(20, 22, 40, .16);
+    transition: opacity .2s ease, border-color .15s ease;
+}
+
+.related-dock-pill:hover { border-color: var(--accent); }
+.related-dock-pill .cnt { color: var(--fg-muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+
+/* シートが開いている間はピルを引っ込める */
+body:has(.related-dock-sheet:popover-open) .related-dock-pill {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.related-dock-sheet {
+    /* popover の UA スタイル (inset:0; margin:auto) を上書きして下端に貼る。
+       display は UA の「閉時 display:none」を殺さないよう :popover-open 側でだけ指定する */
+    inset: auto 0 0 0;
+    width: 100%;
+    max-height: min(60vh, 30rem);
+    margin: 0;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+    background: var(--bg);
+    color: var(--fg);
+    box-shadow: 0 -8px 32px rgba(20, 22, 40, .22);
+    padding: 0;
+    /* 開閉アニメーション: display/overlay を離散遷移させてスライドさせる */
+    opacity: 0;
+    transform: translateY(100%);
+    transition:
+        transform .3s cubic-bezier(.32, .72, 0, 1),
+        opacity .3s ease,
+        display .3s allow-discrete,
+        overlay .3s allow-discrete;
+}
+
+.related-dock-sheet:popover-open {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@starting-style {
+    .related-dock-sheet:popover-open {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+}
+
+.related-dock-sheet.dragging { transition: none; }
+
+/* popover 非対応ブラウザで JS が hidden を立てたとき用 (display 指定に負けないように) */
+.related-dock-pill[hidden],
+.related-dock-sheet[hidden] { display: none; }
+
+.related-dock-sheet::backdrop {
+    background: rgba(15, 16, 24, .35);
+}
+
+.related-dock-head {
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    padding: 1rem 1.1rem .55rem;
+    touch-action: none; /* 下スワイプで閉じるジェスチャ用 */
+}
+
+.related-dock-handle {
+    position: absolute;
+    top: .4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2.4rem;
+    height: .28rem;
+    border-radius: 999px;
+    background: var(--border);
+}
+
+.related-dock-title { margin: 0; font-size: .88rem; font-weight: 600; }
+
+.related-dock-close {
+    font-family: inherit;
+    font-size: .76rem;
+    color: var(--fg-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: .15rem .3rem;
+}
+
+.related-dock-close:hover { color: var(--accent); }
+
+.related-dock-list {
+    list-style: none;
+    margin: 0;
+    padding: 0 .45rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.related-dock-list a {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    padding: .55rem .65rem;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--fg);
+}
+
+.related-dock-list li + li a { border-top: 1px solid var(--border); border-radius: 0 0 10px 10px; }
+.related-dock-list a:hover { background: var(--bg-soft); }
+
+.related-dock-item-title { font-size: .9rem; font-weight: 500; line-height: 1.5; }
+
+.related-dock-item-meta {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: .2rem .6rem;
+    font-size: .72rem;
+    color: var(--fg-muted);
+}
+
+.related-dock-rel { font-weight: 600; }
+.related-dock-rel.rel-mutual { color: var(--accent); }
+.related-dock-date { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+.related-dock-connections {
+    flex: none;
+    display: block;
+    text-align: center;
+    font-size: .8rem;
+    text-decoration: none;
+    padding: .65rem 1rem calc(.75rem + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--border);
+    background: var(--bg-soft);
+    border-radius: 0;
+}
+
+/* デスクトップ: ボトムシートではなく右下のフロートパネルにする */
+@media (min-width: 961px) {
+    .related-dock-pill {
+        left: auto;
+        right: 1.5rem;
+        transform: none;
+    }
+
+    .related-dock-sheet {
+        inset: auto 1.5rem 1.5rem auto;
+        width: 22rem;
+        max-height: min(70vh, 34rem);
+        border-radius: 14px;
+        border-bottom: 1px solid var(--border);
+        box-shadow: 0 12px 40px rgba(20, 22, 40, .25);
+        transform: translateY(.8rem);
+    }
+
+    @starting-style {
+        .related-dock-sheet:popover-open {
+            transform: translateY(.8rem);
+        }
+    }
+
+    .related-dock-sheet::backdrop { background: transparent; }
+    .related-dock-handle { display: none; }
+    .related-dock-head { touch-action: auto; padding-top: .8rem; }
+    .related-dock-connections { border-radius: 0 0 14px 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .related-dock-sheet { transition: none; }
 }
