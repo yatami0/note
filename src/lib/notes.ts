@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { toExportMarkdown } from './export-markdown.js';
 import { createProcessor, renderNote } from './pipeline.js';
 
 export interface Note {
@@ -16,6 +17,8 @@ export interface Note {
   links: { slug: string; title: string }[];
   /** 一覧カード用の本文抜粋 (プレーンテキスト) */
   excerpt: string;
+  /** コピー・/<slug>.md 配信用のエクスポートMarkdown (wikilink解決済み) */
+  markdown: string;
   hasMermaid: boolean;
   hasMath: boolean;
   hasTweet: boolean;
@@ -125,6 +128,7 @@ async function build(srcDir: string): Promise<NoteCollection> {
         .filter((slug) => slug !== raw.slug)
         .map((slug) => ({ slug, title: titleBySlug.get(slug)! })),
       excerpt: makeExcerpt(raw.body),
+      markdown: toExportMarkdown(raw, titleBySlug),
       hasMermaid: r.hasMermaid,
       hasMath: r.hasMath,
       hasTweet: r.hasTweet,

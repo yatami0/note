@@ -362,6 +362,25 @@ a { color: var(--accent); }
 .note-backlinks h2 { font-size: .95rem; margin: 0 0 .3rem; border: none; padding: 0; }
 .note-backlinks ul { margin: 0; padding-left: 1.2rem; }
 
+.note-tools {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: .5rem;
+}
+
+.note-tools button {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg-muted);
+    cursor: pointer;
+    font-size: .8rem;
+    font-family: inherit;
+    padding: .25rem .6rem;
+}
+
+.note-tools button:hover { color: var(--accent); border-color: var(--accent); }
+
 .note-meta {
     margin-top: 1.5rem;
     color: var(--fg-muted);
