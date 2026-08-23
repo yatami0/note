@@ -81,6 +81,15 @@ yatami0 個人のノートリポジトリ。Andy Matuschak の「エバーグリ
 - コードブロック・インラインコード内の`$$`や`\(...\)`は数式として解釈されない（シェルの`$$`やコード例を安全に書ける）。
 - 数式内の`[[...]]`や`#tag`もリンク・タグとして解釈されない。
 
+## Markdownエクスポート（AIに渡す用のコピー）
+
+各ノートページ右上の「📋 Markdownをコピー」ボタンで、そのノートをAI等へそのまま貼り付けられるMarkdownとしてコピーできる。同じ内容は `https://konohachi.com/<slug>.md` としても配信される（`src/pages/[slug].md.ts`。curl等での取得も可）。
+
+- 生ソースの`[[wikilink]]`はサイト外では解決できないため、ビルド時（`src/lib/export-markdown.ts`）に`[タイトル](https://konohachi.com/<slug>/)`形式の絶対URLリンクへ解決される。未解決のwikilinkはプレーンテキストに落ちる。
+- 先頭に出典の分かる`source`（ノートの正規URL）と`created`/`updated`のfrontmatterが付く。
+- `#tag`・mermaid・数式・コードブロックは記法のまま残る。コードブロック・インラインコード内の`[[...]]`は変換されない。
+- 仕様は`tests/export-markdown.test.ts`でテストとして固定されている。
+
 ## X(Twitter)投稿を発端にしたノート
 
 X上の発言をきっかけにノートを書き起こす場合は、その投稿を主とした文章構造にすること。「Xでこう言っていた → それを踏まえてこう考えた」の順で書き、地の文で発言内容を要約・言い換えて済ませない。
@@ -159,6 +168,7 @@ git config core.hooksPath .githooks    # 作成日・更新日の自動付与フ
 - `notes/src/*.md` — ノートのMarkdownソース（先頭にcreated/updatedのYAML frontmatter）
 - `src/lib/pipeline.ts` + `src/lib/remark/` `src/lib/rehype/` — md変換パイプライン（wikiリンク・タグ・mermaid・KaTeX・X埋め込み）
 - `src/lib/notes.ts` — 全ノートの読み込み・バックリンク/タグ集約
+- `src/lib/export-markdown.ts` — コピー・`/<slug>.md`配信用のエクスポートMarkdown生成（wikilink→絶対URL解決）
 - `src/pages/` `src/layouts/` `src/styles/` — ページ生成（一覧/ノート/タグ/RSS/sitemap/検索インデックス）とUI
 - `tests/` — 変換ルールの仕様テスト（Vitest。#tagやwikilinkの認識ルールを変えるときはここも更新）
 - `.githooks/pre-commit` / `scripts/update-note-dates.mjs` — pre-commitフックによる作成日・更新日自動付与

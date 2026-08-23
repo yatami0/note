@@ -21,6 +21,14 @@ const tocHeadings = note.headings.filter((h) => h.depth <= 3);
   </Fragment>
   <div class="note-page">
     <main class="note-main">
+      <div class="note-tools">
+        <button
+          type="button"
+          class="copy-md"
+          data-md-path={`/${note.slug}.md`}
+          title="wikilinkを絶対URLに解決したMarkdownをコピー (AIに渡す用)"
+        >📋 Markdownをコピー</button>
+      </div>
       <article class="note-content" set:html={note.html} />
       {note.backlinks.length > 0 && (
         <aside class="note-backlinks">
@@ -50,6 +58,26 @@ const tocHeadings = note.headings.filter((h) => h.depth <= 3);
       </nav>
     )}
   </div>
+  <script>
+    // エクスポートMarkdown (/<slug>.md) を取得してクリップボードへコピーする
+    const btn = document.querySelector<HTMLButtonElement>('.note-tools .copy-md');
+    if (btn) {
+      const original = btn.textContent;
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      btn.addEventListener('click', async () => {
+        try {
+          const res = await fetch(btn.dataset.mdPath!);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          await navigator.clipboard.writeText(await res.text());
+          btn.textContent = '✅ コピーしました';
+        } catch {
+          btn.textContent = '❌ コピーできませんでした';
+        }
+        clearTimeout(timer);
+        timer = setTimeout(() => { btn.textContent = original; }, 2000);
+      });
+    }
+  </script>
   {note.hasMermaid && (
     <script type="module" is:inline>
       // mermaid はクライアントサイドで描画し、テーマ切替に追従して再レンダリングする
