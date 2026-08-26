@@ -1,0 +1,222 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getBookmarks } from '../../lib/bookmarks';
+import { GITHUB_REPO } from '../../lib/site';
+
+const bookmarks = await getBookmarks();
+
+// タグ絞り込みチップ (件数降順・同数ならタグ名昇順)
+const tagCounts = new Map<string, number>();
+for (const b of bookmarks) {
+  for (const t of b.tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
+}
+const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+
+const searchTextFor = (b: (typeof bookmarks)[number]) =>
+  [b.title, b.summary, b.domain, b.url, ...b.tags].join(' ').toLowerCase();
+---
+
+<Base title="ブックマーク" description="気になった記事のブックマーク。AIによる要約・タグ付き。">
+  <main class="page page-narrow">
+    <div class="hero">
+      <h1>🔖 ブックマーク</h1>
+      <p>
+        気になった記事の置き場。URLを登録しておくと、1日1回のバッチがAIで要約とタグを付けてここに並べる。
+      </p>
+    </div>
+
+    <form id="bm-add" class="bm-add">
+      <input
+        type="url"
+        id="bm-url"
+        placeholder="https://... を貼って登録"
+        autocomplete="off"
+        required
+      />
+      <button type="submit">登録</button>
+    </form>
+    <p id="bm-add-status" class="bm-add-status" hidden></p>
+    <details class="bm-token">
+      <summary>ワンタップ登録の設定 (GitHubトークン)</summary>
+      <p>
+        登録は <a href={`https://github.com/${GITHUB_REPO}/issues`}>GitHub Issue</a>
+        (<code>bookmark</code>ラベル) として積まれる。ここに
+        <a href="https://github.com/settings/personal-access-tokens/new"
+          >fine-grained personal access token</a
+        >
+        (このリポジトリの Issues: Read and write のみ) を保存しておくと、フォームから直接
+        Issue を作れる。トークンはこのブラウザの localStorage にだけ保存される。
+        未設定の場合は GitHub の Issue 作成画面が開く。
+      </p>
+      <div class="bm-token-row">
+        <input type="password" id="bm-token-input" placeholder="github_pat_..." autocomplete="off" />
+        <button type="button" id="bm-token-save">保存</button>
+        <button type="button" id="bm-token-clear">削除</button>
+      </div>
+      <p id="bm-token-status" class="bm-add-status"></p>
+    </details>
+
+    {
+      bookmarks.length > 0 && (
+        <div class="bm-filter">
+          <input
+            type="search"
+            id="bm-search"
+            placeholder={`要約・タイトル・タグで絞り込み (全${bookmarks.length}件)`}
+            autocomplete="off"
+          />
+          {tags.length > 0 && (
+            <div class="bm-tags" id="bm-tags">
+              {tags.map(([tag, count]) => (
+                <button type="button" class="note-tag bm-tag" data-tag={tag}>
+                  #{tag} <span class="bm-tag-count">{count}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    <ul class="bm-list" id="bm-list">
+      {
+        bookmarks.map((b) => (
+          <li class="bm-item" data-search={searchTextFor(b)} data-tags={b.tags.join(' ')}>
+            <h2>
+              <a href={b.url} target="_blank" rel="noopener noreferrer">
+                {b.title}
+              </a>
+            </h2>
+            <div class="bm-meta">
+              <span class="bm-domain">{b.domain}</span>
+              <span class="note-date">{b.added.slice(0, 10)}</span>
+              {b.tags.map((tag) => (
+                <button type="button" class="note-tag bm-tag" data-tag={tag}>
+                  #{tag}
+                </button>
+              ))}
+            </div>
+            <p class="bm-summary">{b.summary}</p>
+          </li>
+        ))
+      }
+    </ul>
+    {bookmarks.length === 0 && <p class="bm-empty">まだブックマークがない。上のフォームからURLを登録すると、翌朝のバッチ処理後にここに並ぶ。</p>}
+    <p class="bm-empty" id="bm-no-hits" hidden>絞り込みに一致するブックマークがない。</p>
+  </main>
+</Base>
+
+<script is:inline define:vars={{ repo: GITHUB_REPO }}>
+  // ---- 登録フォーム: PATがあれば GitHub API で直接 Issue 作成、なければ Issue 作成画面を開く
+  var TOKEN_KEY = 'bookmark-gh-token';
+  var form = document.getElementById('bm-add');
+  var urlInput = document.getElementById('bm-url');
+  var status = document.getElementById('bm-add-status');
+
+  function getToken() {
+    try {
+      return localStorage.getItem(TOKEN_KEY);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function showStatus(msg, isError) {
+    status.textContent = msg;
+    status.hidden = false;
+    status.classList.toggle('is-error', !!isError);
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var url = urlInput.value.trim();
+    if (!url) return;
+    var token = getToken();
+    if (!token) {
+      window.open(
+        'https://github.com/' + repo + '/issues/new?labels=bookmark&title=' + encodeURIComponent(url),
+        '_blank',
+        'noopener'
+      );
+      showStatus('GitHubのIssue作成画面を開いた。そのまま「Submit new issue」で登録される。', false);
+      return;
+    }
+    showStatus('登録中...', false);
+    fetch('https://api.github.com/repos/' + repo + '/issues', {
+      method: 'POST',
+      headers: {
+        authorization: 'Bearer ' + token,
+        accept: 'application/vnd.github+json',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ title: url, labels: ['bookmark'] }),
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function (issue) {
+        urlInput.value = '';
+        showStatus('登録した (Issue #' + issue.number + ')。翌朝のバッチでAIが要約・タグ付けする。', false);
+      })
+      .catch(function (err) {
+        showStatus(
+          '登録に失敗 (' + err.message + ')。トークンの権限 (Issues: Read and write) と有効期限を確認。',
+          true
+        );
+      });
+  });
+
+  // ---- トークンの保存/削除
+  var tokenInput = document.getElementById('bm-token-input');
+  var tokenStatus = document.getElementById('bm-token-status');
+  document.getElementById('bm-token-save').addEventListener('click', function () {
+    var v = tokenInput.value.trim();
+    if (!v) return;
+    try {
+      localStorage.setItem(TOKEN_KEY, v);
+      tokenInput.value = '';
+      tokenStatus.textContent = 'このブラウザに保存した。以後はフォームから直接登録できる。';
+    } catch (e) {
+      tokenStatus.textContent = '保存に失敗 (localStorageが使えない環境)。';
+    }
+  });
+  document.getElementById('bm-token-clear').addEventListener('click', function () {
+    try {
+      localStorage.removeItem(TOKEN_KEY);
+    } catch (e) {}
+    tokenStatus.textContent = '削除した。';
+  });
+  if (getToken()) tokenStatus.textContent = 'トークン保存済み。フォームから直接登録できる。';
+
+  // ---- 絞り込み: テキスト検索 × タグ (AND)
+  var searchInput = document.getElementById('bm-search');
+  var items = Array.prototype.slice.call(document.querySelectorAll('.bm-item'));
+  var noHits = document.getElementById('bm-no-hits');
+  var activeTag = null;
+
+  function applyFilter() {
+    var q = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    var visible = 0;
+    items.forEach(function (item) {
+      var okText = !q || item.getAttribute('data-search').indexOf(q) !== -1;
+      var okTag = !activeTag || (' ' + item.getAttribute('data-tags') + ' ').indexOf(' ' + activeTag + ' ') !== -1;
+      var show = okText && okTag;
+      item.hidden = !show;
+      if (show) visible++;
+    });
+    noHits.hidden = visible > 0 || items.length === 0;
+    document.querySelectorAll('.bm-tag').forEach(function (btn) {
+      btn.classList.toggle('is-active', btn.getAttribute('data-tag') === activeTag);
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('.bm-tag') : null;
+    if (!btn) return;
+    var tag = btn.getAttribute('data-tag');
+    activeTag = activeTag === tag ? null : tag;
+    applyFilter();
+  });
+  if (searchInput) searchInput.addEventListener('input', applyFilter);
+</script>

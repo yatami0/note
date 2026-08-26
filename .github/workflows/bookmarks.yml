@@ -1,0 +1,72 @@
+name: Bookmarks
+
+# `bookmark` ラベル付き Issue (登録キュー) を1日1回処理し、Claude API で
+# 要約+タグ付けした結果を bookmarks/*.json として main へコミットする。
+# 詳細は CLAUDE.md の「ブックマーク機能」と scripts/process-bookmarks.mjs 参照。
+on:
+  schedule:
+    - cron: '0 21 * * *' # 毎日 06:00 JST
+  workflow_dispatch:
+
+concurrency:
+  group: bookmarks
+  cancel-in-progress: false
+
+permissions:
+  contents: write # bookmarks/*.json のコミット
+  issues: write # キュー Issue のクローズ・コメント
+  actions: write # デプロイワークフローの起動
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          # push 前の rebase (並行 push との競合回避) のため全履歴を取る
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Process bookmark queue
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BOOKMARKS_MODEL: ${{ vars.BOOKMARKS_MODEL }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::warning::ANTHROPIC_API_KEY が未設定のためスキップ (リポジトリの Secrets に設定してください)"
+            exit 0
+          fi
+          node scripts/process-bookmarks.mjs
+
+      - name: Commit and push
+        id: commit
+        run: |
+          git add bookmarks
+          if git diff --cached --quiet; then
+            echo "変更なし"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "bookmarks: 日次バッチによるブックマーク更新"
+          git pull --rebase origin main
+          git push origin main
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # 既定の GITHUB_TOKEN での push は deploy.yml の push トリガーを発火させない
+      # (GitHub Actions の仕様) ため、明示的に workflow_dispatch で起動する
+      - name: Trigger deploy
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main

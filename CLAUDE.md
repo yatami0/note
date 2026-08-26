@@ -90,6 +90,16 @@ yatami0 個人のノートリポジトリ。Andy Matuschak の「エバーグリ
 - `#tag`・mermaid・数式・コードブロックは記法のまま残る。コードブロック・インラインコード内の`[[...]]`は変換されない。
 - 仕様は`tests/export-markdown.test.ts`でテストとして固定されている。
 
+## ブックマーク機能
+
+ノートとは別機能として、気になった記事のURLを溜めておく自分用ブックマークがある (`/bookmarks/`)。「サイトでURLを登録 → 1日1回のバッチがAIで要約・タグ付け → 一覧に反映」という流れで動く。
+
+- **登録**: `/bookmarks/` のフォームにURLを入れると、このリポジトリに `bookmark` ラベル付きIssueが作られる (登録キュー)。ブラウザにfine-grained PAT (このリポジトリの Issues: Read and write のみ) を保存しておけばフォームから直接作成、未設定ならGitHubのIssue作成画面がプリフィルで開く。GitHubアプリ等から直接Issueを立ててもよい (タイトルか本文にURLを書き、`bookmark` ラベルを付ける)。
+- **日次処理**: `.github/workflows/bookmarks.yml` (毎日06:00 JST + 手動実行可) が `scripts/process-bookmarks.mjs` を実行する。`bookmark` ラベルのオープンIssueごとに、記事本文を取得 (X/Twitterのポストは oEmbed API 経由) → Claude API (`@anthropic-ai/sdk`、既定モデル `claude-opus-5`、リポジトリ変数 `BOOKMARKS_MODEL` で変更可) で日本語要約+タグ付け → `bookmarks/<id>.json` を生成してmainへコミット → Issueにコメントしてクローズ → デプロイをdispatchする。処理に失敗したIssueには `bookmark-error` ラベルとエラーコメントが付く (ラベルを外すと翌日再試行)。コラボレータ以外が立てたIssueは処理しない。
+- **閲覧**: `/bookmarks/` に登録日の新しい順で並ぶ。各ブックマークはタイトル (元記事への外部リンク)・ドメイン・登録日・タグ・AI要約を表示。ページ内のテキスト検索 (タイトル・要約・タグ・URLの部分一致) とタグチップで絞り込める。全文は保存せず要約のみ (`bookmarks/*.json`)。ノートの `#tag`・検索インデックス・RSSとは独立している。
+- **必要なSecrets**: `ANTHROPIC_API_KEY` (リポジトリのActions secretsに設定。未設定の場合バッチは警告を出してスキップ)。Issueの読み書き・コミットはActions既定の `GITHUB_TOKEN` で行う。
+- 仕様 (URL抽出・正規化・タグのサニタイズ・JSONの読み込み) は `tests/bookmarks.test.ts` でテストとして固定されている。
+
 ## X(Twitter)投稿を発端にしたノート
 
 X上の発言をきっかけにノートを書き起こす場合は、その投稿を主とした文章構造にすること。「Xでこう言っていた → それを踏まえてこう考えた」の順で書き、地の文で発言内容を要約・言い換えて済ませない。
@@ -170,6 +180,8 @@ git config core.hooksPath .githooks    # 作成日・更新日の自動付与フ
 - `src/lib/notes.ts` — 全ノートの読み込み・バックリンク/タグ集約
 - `src/lib/export-markdown.ts` — コピー・`/<slug>.md`配信用のエクスポートMarkdown生成（wikilink→絶対URL解決）
 - `src/pages/` `src/layouts/` `src/styles/` — ページ生成（一覧/ノート/タグ/RSS/sitemap/検索インデックス）とUI
+- `bookmarks/*.json` + `src/lib/bookmarks.ts` + `src/pages/bookmarks/` — ブックマークのデータ・読み込み・一覧ページ
+- `scripts/process-bookmarks.mjs` / `.github/workflows/bookmarks.yml` — ブックマークの日次AI処理（要約・タグ付け）
 - `tests/` — 変換ルールの仕様テスト（Vitest。#tagやwikilinkの認識ルールを変えるときはここも更新）
 - `.githooks/pre-commit` / `scripts/update-note-dates.mjs` — pre-commitフックによる作成日・更新日自動付与
 - `.github/workflows/ci.yml` / `deploy.yml` — PR時のテスト+プレビュー / mainマージ時のCloudflareデプロイ

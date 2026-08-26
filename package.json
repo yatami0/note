@@ -27,12 +27,14 @@
     "vfile": "^6.0.3"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.120.0",
     "@astrojs/check": "^0.9.10",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10",
-    "wrangler": "^4.123.0"
+    "wrangler": "^4.123.0",
+    "zod": "^4.4.3"
   },
   "scripts": {
     "dev": "node scripts/sync-katex.mjs && astro dev",
