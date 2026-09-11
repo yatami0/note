@@ -1,6 +1,6 @@
 ---
 created: 2026-08-20 00:21
-updated: 2026-08-20 00:21
+updated: 2026-09-11 12:04
 ---
 # AIエージェント基盤の見取り図（MOC）
 
@@ -25,6 +25,12 @@ updated: 2026-08-20 00:21
 - [[dynamic-workers]] — 実行時に決まったコードをV8 isolateで隔離実行する。既定でインターネットを遮断し、渡したbinding経由でしか外に出られない。Durable Object Facetsで「永続ストレージは与えるがこちらのDBは見せない」も作れる
 - [[code-mode]] — そもそもエージェントに**ツールを呼ばせるのをやめてコードを書かせる**方式。中間データがLLMを通らなくなる代わりに、そのコードを動かす隔離環境が必須になる（だから上とセットで出てくる）
 
+## マネージドサービス側の答え
+
+- [[amazon-bedrock-agentcore]] — AWSの本番運用基盤。「権限」にはGateway境界のCedarポリシー（Policy）で、「実行場所」にはセッション隔離されたRuntimeとmicroVMのHarnessで答えている。capabilityではなくポリシーエンジン型
+- [[strands-agents]] — その上で動かすことを想定したAWSのエージェントSDK。model-drivenを掲げ、プロンプトとツールだけ渡してループはSDKに任せる
+- [[nx-plugin-for-aws]] — 上2つを含むAWS構成をNxモノレポ上でジェネレータから組み立てるツール。エージェント・MCPサーバー・Gatewayの配線まで生成する
+
 ## 全部使って組んだ実例
 
 - [[cloudflare-os]] — gadget（1ユーザー1インスタンスのアプリ）、Gatekeeper（capabilityベースの仲介役）、Blueprint（コードの配布単位）。上記5ノートの技術を全部使ってCloudflareが社内向けに作り、OSSで公開したもの
@@ -39,6 +45,7 @@ updated: 2026-08-20 00:21
 | ツール呼び出しのトークンを減らしたい | [[code-mode]] |
 | 作ったアプリをエージェントから操作させたい | [[capnweb]] |
 | 全部入りの実装を読みたい | [[cloudflare-os]] |
+| AWSのマネージド基盤ではどう解いているか | [[amazon-bedrock-agentcore]] |
 
 ## 隣接する見取り図
 

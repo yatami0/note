@@ -1,6 +1,6 @@
 ---
 created: 2026-08-20 00:14
-updated: 2026-08-20 00:21
+updated: 2026-09-11 12:04
 ---
 # MCP (Model Context Protocol)
 
@@ -73,6 +73,7 @@ LLMアプリケーションと外部のデータソース・ツールを繋ぐ�
 
 - **[[cloudflare-os]]のGatekeeper** — 自称「supercharged MCP servers」。事前設定ではなく、使わせたいリソースを都度「紹介」する。アクセスは意図した特定リソースに絞られ、全アクションがログに残り、副作用のある操作は人間の承認を通る
 - **[[sandstorm]]のpowerbox** — 10年前の同じ発想。「許可しますか？」ではなく「どれを使いますか？」と聞くことで、指定と権限を一体にする
+- **[[amazon-bedrock-agentcore|AgentCore]]のGateway + Policy** — 複数のMCPサーバーを1つのGatewayに束ね、その境界でCedarポリシーが全ツール呼び出しを引数まで見て認可する（default-deny）。ポリシー上常に拒否されるツールは`list tools`の応答から除外され、モデルには最初から見えない。capabilityではなくポリシーエンジン側からの答え
 
 ## Code Modeとの関係
 
